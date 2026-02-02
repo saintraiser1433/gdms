@@ -1,0 +1,182 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String     @map("password_hash")
+  name         String
+  role         Role       @default(PROGRAM_HEAD)
+  status       UserStatus @default(ACTIVE)
+  courseId     String?    @map("course_id")
+  course       Course?    @relation(fields: [courseId], references: [id])
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  // Relations
+  createdReports  Report[]  @relation("ReportCreator")
+  reviewedReports Report[]  @relation("ReportReviewer")
+  comments        Comment[]
+
+  @@map("users")
+}
+
+model Report {
+  id                   String   @id @default(cuid())
+  programName          String   @map("program_name")
+  implementationPeriod String   @map("implementation_period")
+  responsiblePerson    String   @map("responsible_person")
+  location             String
+  course               String
+  schoolYear           String   @map("school_year")
+  status               ReportStatus @default(DRAFT)
+  
+  createdById   String   @map("created_by")
+  createdBy     User     @relation("ReportCreator", fields: [createdById], references: [id])
+  
+  reviewedById  String?  @map("reviewed_by")
+  reviewedBy    User?    @relation("ReportReviewer", fields: [reviewedById], references: [id])
+  
+  createdAt     DateTime @default(now()) @map("created_at")
+  submittedAt   DateTime? @map("submitted_at")
+  reviewedAt    DateTime? @map("reviewed_at")
+
+  // Relations
+  objectives Objective[]
+  comments   Comment[]
+
+  @@index([status])
+  @@index([course])
+  @@index([schoolYear])
+  @@index([createdById])
+  @@map("reports")
+}
+
+model Objective {
+  id         String @id @default(cuid())
+  reportId   String @map("report_id")
+  report     Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  title      String
+  orderIndex Int    @map("order_index")
+
+  // Relations
+  kpis Kpi[]
+
+  @@index([reportId])
+  @@map("objectives")
+}
+
+model Kpi {
+  id          String    @id @default(cuid())
+  objectiveId String    @map("objective_id")
+  objective   Objective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  description String
+  orderIndex  Int       @map("order_index")
+
+  // Relations
+  strategies Strategy[]
+
+  @@index([objectiveId])
+  @@map("kpis")
+}
+
+model Strategy {
+  id          String @id @default(cuid())
+  kpiId       String @map("kpi_id")
+  kpi         Kpi    @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+  description String
+  target      String
+  orderIndex  Int    @map("order_index")
+
+  // Relations
+  timeEntries TimeEntry[]
+
+  @@index([kpiId])
+  @@map("strategies")
+}
+
+model TimeEntry {
+  id               String   @id @default(cuid())
+  strategyId       String   @map("strategy_id")
+  strategy         Strategy @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+  
+  period           Period
+  periodStartMonth String   @map("period_start_month")
+  periodEndMonth   String   @map("period_end_month")
+  
+  activities       String   @default("")
+  status           String   @default("")
+  statusComment    String?  @map("status_comment")
+  budgetAllocated  Float    @default(0) @map("budget_allocated")
+  budgetSource     String   @default("") @map("budget_source")
+  budgetSpent      Float    @default(0) @map("budget_spent")
+  variance         Float    @default(0)
+
+  @@index([strategyId])
+  @@map("time_entries")
+}
+
+model Comment {
+  id               String   @id @default(cuid())
+  reportId         String   @map("report_id")
+  report           Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  
+  commentText      String   @map("comment_text")
+  pinnedToType     PinType  @map("pinned_to_type")
+  pinnedToId       String?  @map("pinned_to_id")
+  pinnedToMetadata String?  @map("pinned_to_metadata") // JSON string for cell coordinates
+  
+  createdById      String   @map("created_by")
+  createdBy        User     @relation(fields: [createdById], references: [id])
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@index([reportId])
+  @@map("comments")
+}
+
+model Course {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  users User[]
+
+  @@map("courses")
+}
+
+enum Role {
+  ADMIN
+  PROGRAM_HEAD
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum ReportStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  DISAPPROVED
+}
+
+enum Period {
+  T1
+  T2
+  T3
+  T4
+}
+
+enum PinType {
+  CELL
+  KPI
+  SECTION
+}

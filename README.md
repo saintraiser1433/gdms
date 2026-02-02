@@ -1,36 +1,209 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GDMS - GIT Database Management System
+
+Community Engagement Services Reporting System
+
+## Overview
+
+GDMS is a comprehensive report management system for tracking community engagement projects across academic terms. The system supports two user roles (Admin/School Head and Program Heads) with a complete workflow from report creation through approval.
+
+## Features
+
+### Authentication & Authorization
+- Role-based access control (Admin and Program Head)
+- Secure authentication with NextAuth.js
+- Protected routes based on user roles
+
+### For Program Heads
+- Create detailed reports with objectives, KPIs, and strategies
+- Track progress across 4 time periods (T1-T4)
+- Submit reports for admin review
+- View report status (Draft, Submitted, Approved, Disapproved)
+- Edit draft reports before submission
+- Hierarchical report organization by Course and School Year
+
+### For Admins (School Heads)
+- Review all submitted reports
+- Approve or disapprove reports
+- View all reports across all programs
+- Dashboard with submission statistics
+- Filter reports by status
+
+### Report Structure
+- **Basic Information**: Program name, implementation period, responsible person, location, course, school year
+- **Objectives**: Multiple objectives per report
+- **KPIs**: Multiple KPIs per objective
+- **Strategies**: Multiple strategies per KPI with targets
+- **Timeline Data (T1-T4)**: For each strategy:
+  - Activities
+  - Status (Not Started, In Progress, Completed, Cancelled)
+  - Budget Allocated
+  - Budget Source (NEW)
+  - Budget Spent
+  - Variance (auto-calculated)
+
+### Additional Features
+- Dark/Light theme toggle
+- Print-optimized report views
+- Responsive design
+- Toast notifications
+- Modern UI with shadcn/ui components
+
+## Tech Stack
+
+- **Framework**: Next.js 16 with App Router
+- **Authentication**: NextAuth.js v5
+- **Database**: PostgreSQL with Prisma ORM
+- **UI Components**: shadcn/ui (Radix UI + Tailwind CSS)
+- **Styling**: Tailwind CSS v4
+- **Icons**: Remix Icons, Tabler Icons
+- **Theme**: next-themes
+
+## Database Schema
+
+- **users**: User accounts with roles
+- **reports**: Main report entries
+- **objectives**: Report objectives
+- **kpis**: Key Performance Indicators
+- **strategies**: Strategies for each KPI
+- **time_entries**: T1-T4 timeline data for each strategy
+- **comments**: Admin comments on reports (for future implementation)
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js 20+ installed
+- PostgreSQL database running
+- Database credentials: postgres/postgres (default)
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Set up the database:
+   ```bash
+   npm run db:generate
+   npm run db:push
+   npm run db:seed
+   ```
+
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+5. Open [http://localhost:3000](http://localhost:3000)
+
+### Demo Accounts
+
+**Admin Account:**
+- Email: admin@gdms.edu
+- Password: admin123
+
+**Program Head Accounts:**
+- Email: nursing@gdms.edu
+- Password: program123
+
+- Email: engineering@gdms.edu
+- Password: program123
+
+## Project Structure
+
+```
+app/
+├── (auth)/
+│   └── login/          # Login page
+├── dashboard/          # Dashboard redirect
+├── reports/            # Program head reports
+│   ├── new/           # Create new report
+│   ├── [id]/          # View report
+│   └── page.tsx       # Reports list
+├── admin/             # Admin dashboard
+└── api/               # API routes
+    ├── auth/          # NextAuth routes
+    └── reports/       # Report CRUD operations
+components/
+├── ui/                # shadcn/ui components
+├── app-sidebar.tsx    # Main sidebar
+├── site-header.tsx    # Header with theme toggle
+├── nav-user.tsx       # User menu
+└── theme-toggle.tsx   # Theme switcher
+lib/
+├── auth.ts            # NextAuth configuration
+├── db.ts              # Prisma client
+└── utils.ts           # Utility functions
+prisma/
+├── schema.prisma      # Database schema
+└── seed.ts            # Database seeding
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Available Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run db:generate` - Generate Prisma client
+- `npm run db:push` - Push schema to database
+- `npm run db:seed` - Seed database with demo users
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment Variables
 
-## Learn More
+Create a `.env` file with:
 
-To learn more about Next.js, take a look at the following resources:
+```
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/gdms"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your-secret-key-here"
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Key Features Implementation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Report Creation
+- Single-page form with nested sections
+- Dynamic add/remove for objectives, KPIs, and strategies
+- Default T1-T4 time periods (configurable)
+- Auto-calculation of variance (Budget Allocated - Budget Spent)
+- Save as draft or submit directly
 
-## Deploy on Vercel
+### Status Workflow
+1. **Draft** - Editable by creator
+2. **Submitted** - Read-only, awaiting admin review
+3. **Approved** - Locked, no further changes
+4. **Disapproved** - Locked, view only
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Role-Based Access
+- Program Heads can only see and edit their own reports
+- Admins can view all reports
+- Middleware protects admin routes
+- API endpoints enforce authorization
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Print Functionality
+- Landscape orientation
+- Hides UI elements (sidebar, header)
+- Full-width table layout
+- Print button on report view page
+
+## Future Enhancements
+
+The current implementation includes the core functionality. Planned enhancements:
+
+1. **Multi-level commenting system**: Cell-level, KPI-level, and section-level comments
+2. **Advanced analytics**: Charts and dashboards with report data
+3. **Export functionality**: Export reports to PDF/Excel
+4. **Email notifications**: Notify users of status changes
+5. **Edit functionality for draft reports**: Reusable form component
+6. **Advanced filtering**: Filter reports by multiple criteria
+7. **Audit logs**: Track all changes to reports
+
+## License
+
+MIT
+
+## Support
+
+For issues or questions, please contact the development team.
