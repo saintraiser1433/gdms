@@ -141,6 +141,38 @@ prisma/
 └── seed.ts            # Database seeding
 ```
 
+## Production Build (macOS)
+
+To set up and build for production on Mac:
+
+```bash
+# Make script executable (first time only)
+chmod +x scripts/build-production.sh
+
+# Run production build (installs deps, migrates DB, builds app)
+./scripts/build-production.sh
+
+# Or with npm
+npm run build:prod
+```
+
+To include database seeding (e.g. for staging):
+
+```bash
+SEED=1 ./scripts/build-production.sh
+```
+
+Then start the production server:
+
+```bash
+npm start
+```
+
+Ensure `.env` has production values:
+- `DATABASE_URL` - PostgreSQL connection string
+- `NEXTAUTH_URL` - Full production URL (e.g. https://gdms.example.com)
+- `NEXTAUTH_SECRET` - Strong random secret
+
 ## Available Scripts
 
 - `npm run dev` - Start development server
