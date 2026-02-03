@@ -21,8 +21,15 @@ export async function GET(request: Request) {
       where.createdById = session.user.id
     }
 
+    // Admin does not see draft reports (only submitted, approved, disapproved)
     if (status) {
-      where.status = status
+      if (session.user.role === "ADMIN" && status === "DRAFT") {
+        where.id = "00000000-0000-0000-0000-000000000000" // Return empty for admin
+      } else {
+        where.status = status
+      }
+    } else if (session.user.role === "ADMIN") {
+      where.status = { not: "DRAFT" }
     }
     if (course) {
       where.course = course

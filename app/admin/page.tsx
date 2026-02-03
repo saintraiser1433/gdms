@@ -49,18 +49,7 @@ function ReportTable({
 }) {
   const router = useRouter()
 
-  const getStatusBadge = (status: string) => (
-    <StatusBadge
-      status={status}
-      className={
-        status === "APPROVED"
-          ? "border-green-200 bg-green-50 text-green-800 dark:border-green-900 dark:bg-green-950 dark:text-green-300"
-          : status === "DISAPPROVED"
-          ? "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-300"
-          : ""
-      }
-    />
-  )
+  const getStatusBadge = (status: string) => <StatusBadge status={status} />
 
   const columns = [
     {

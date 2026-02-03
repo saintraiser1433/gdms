@@ -97,10 +97,25 @@ model Kpi {
   orderIndex  Int       @map("order_index")
 
   // Relations
-  strategies Strategy[]
+  strategies  Strategy[]
+  attachments KpiAttachment[]
 
   @@index([objectiveId])
   @@map("kpis")
+}
+
+model KpiAttachment {
+  id        String   @id @default(cuid())
+  kpiId     String   @map("kpi_id")
+  kpi       Kpi      @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+  fileName  String   @map("file_name")
+  filePath  String   @map("file_path")
+  mimeType  String   @map("mime_type")
+  fileSize  Int      @map("file_size")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([kpiId])
+  @@map("kpi_attachments")
 }
 
 model Strategy {

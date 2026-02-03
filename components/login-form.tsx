@@ -1,6 +1,10 @@
 "use client"
 
+import Image from "next/image"
 import { cn } from "@/lib/utils"
+
+import municipalLogoImg from "@/app/login/assets/municipalogo.png"
+import schoolLogoImg from "@/app/login/assets/school-logo.png"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -10,6 +14,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { IconEye, IconEyeOff, IconLock, IconMail } from "@tabler/icons-react"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -21,6 +26,7 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -54,10 +60,28 @@ export function LoginForm({
   }
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden p-0">
-        <CardContent className="grid p-0 md:grid-cols-2">
-          <form className="p-6 md:p-8" onSubmit={onSubmit}>
+    <div className={cn("flex flex-col items-center gap-6", className)} {...props}>
+      <div className="flex items-center justify-center gap-8">
+        <Image
+          src={municipalLogoImg}
+          alt="Municipality of Glan"
+          width={80}
+          height={80}
+          className="h-20 w-20 object-contain"
+          crossOrigin="anonymous"
+        />
+        <Image
+          src={schoolLogoImg}
+          alt="Glan Institute of Technology"
+          width={80}
+          height={80}
+          className="h-20 w-20 object-contain"
+          crossOrigin="anonymous"
+        />
+      </div>
+      <Card className="w-full shadow-lg">
+        <CardContent className="p-4 md:p-5">
+          <form onSubmit={onSubmit}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="text-2xl font-bold">Welcome back</h1>
@@ -67,53 +91,55 @@ export function LoginForm({
               </div>
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="admin@gdms.edu"
-                  required
-                  disabled={isLoading}
-                />
+                <div className="relative">
+                  <IconMail className="text-muted-foreground pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2" />
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="admin@gdms.edu"
+                    required
+                    disabled={isLoading}
+                    className="h-9 pl-9 text-sm"
+                  />
+                </div>
               </Field>
               <Field>
                 <FieldLabel htmlFor="password">Password</FieldLabel>
-                <Input 
-                  id="password" 
-                  name="password" 
-                  type="password" 
-                  required 
-                  disabled={isLoading}
-                />
+                <div className="relative">
+                  <IconLock className="text-muted-foreground pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2" />
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    placeholder="*********"
+                    disabled={isLoading}
+                    className="h-9 pl-9 pr-9 text-sm"
+                  />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => setShowPassword((p) => !p)}
+                    className="text-muted-foreground hover:text-foreground absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? (
+                      <IconEyeOff className="size-4" />
+                    ) : (
+                      <IconEye className="size-4" />
+                    )}
+                  </button>
+                </div>
               </Field>
               <Field>
-                <Button type="submit" disabled={isLoading}>
+                <Button type="submit" disabled={isLoading} className="h-9 text-sm">
                   {isLoading ? "Logging in..." : "Login"}
                 </Button>
               </Field>
-              <FieldDescription className="text-center text-sm">
-                <strong>Demo Accounts:</strong><br />
-                Admin: admin@gdms.edu / admin123<br />
-                Program Head: nursing@gdms.edu / program123
-              </FieldDescription>
+             
             </FieldGroup>
           </form>
-          <div className="bg-muted relative hidden md:block">
-            <div className="absolute inset-0 flex items-center justify-center p-8">
-              <div className="text-center">
-                <img
-                  src="/logo/school-logo.png"
-                  alt="Logo"
-                  className="mx-auto mb-4 h-24 w-24 object-contain"
-                />
-                <h2 className="text-3xl font-bold mb-4">GDMS</h2>
-                <p className="text-lg">GIT Database Management System</p>
-                <p className="text-sm mt-2 text-muted-foreground">
-                  Community Engagement Services Reporting
-                </p>
-              </div>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </div>

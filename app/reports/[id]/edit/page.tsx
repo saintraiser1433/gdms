@@ -84,8 +84,8 @@ export default function EditReportPage() {
       <AppSidebar />
       <SidebarInset>
         <SiteHeader />
-        <div className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-          <div className="mx-auto w-full max-w-4xl">
+        <div className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-auto">
+          <div className="mx-auto w-full max-w-8xl min-h-0">
             <CreateReportForm
               reportId={reportId}
               onSuccess={handleSuccess}

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
-import { SiteFooter } from "@/components/site-footer"
 import { toast } from "sonner"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DataTableWrapper } from "@/components/data-table-wrapper"
@@ -211,8 +210,7 @@ export default function CoursesPage() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SiteFooter withSidebarOffset />
-      <SidebarInset className="pb-12">
+      <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <Card className="pb-2">

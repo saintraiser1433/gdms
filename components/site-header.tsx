@@ -23,6 +23,7 @@ const PATH_LABELS: Record<string, string> = {
   reports: "Reports",
   courses: "Courses",
   users: "User Management",
+  catalog: "Report Catalogs",
 }
 
 export function SiteHeader() {

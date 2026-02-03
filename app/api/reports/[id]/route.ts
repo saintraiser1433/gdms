@@ -35,6 +35,7 @@ export async function GET(
           include: {
             kpis: {
               include: {
+                attachments: true,
                 strategies: {
                   include: {
                     timeEntries: {
@@ -138,6 +139,7 @@ export async function PUT(
       course,
       schoolYear,
       objectives,
+      status: statusUpdate,
     } = body
 
     // Validate: budget spent must not exceed budget allocated
@@ -157,10 +159,46 @@ export async function PUT(
       )
     }
 
+    // Preserve attachments before delete (files stay on disk)
+    const existingReportWithAttachments = await prisma.report.findUnique({
+      where: { id },
+      include: {
+        objectives: {
+          orderBy: { orderIndex: "asc" },
+          include: {
+            kpis: {
+              orderBy: { orderIndex: "asc" },
+              include: { attachments: true },
+            },
+          },
+        },
+      },
+    })
+    const attachmentsToRestore: { objIndex: number; kpiIndex: number; att: { fileName: string; filePath: string; mimeType: string; fileSize: number } }[] = []
+    existingReportWithAttachments?.objectives?.forEach((obj, oi) => {
+      obj.kpis.forEach((kpi, ki) => {
+        kpi.attachments.forEach((att) => {
+          attachmentsToRestore.push({
+            objIndex: oi,
+            kpiIndex: ki,
+            att: {
+              fileName: att.fileName,
+              filePath: att.filePath,
+              mimeType: att.mimeType,
+              fileSize: att.fileSize,
+            },
+          })
+        })
+      })
+    })
+
     // Delete existing nested data
     await prisma.objective.deleteMany({
       where: { reportId: id },
     })
+
+    // When saving as draft, set status to DRAFT (approved reports already blocked above)
+    const canSetDraft = statusUpdate === "DRAFT"
 
     // Update report with new data
     const report = await prisma.report.update({
@@ -172,6 +210,7 @@ export async function PUT(
         location,
         course,
         schoolYear,
+        ...(canSetDraft && { status: "DRAFT" }),
         objectives: {
           create: objectives?.map((obj: any, objIndex: number) => ({
             title: obj.title,
@@ -222,6 +261,22 @@ export async function PUT(
         },
       },
     })
+
+    // Restore attachments to new KPIs
+    for (const { objIndex, kpiIndex, att } of attachmentsToRestore) {
+      const newKpi = report.objectives?.[objIndex]?.kpis?.[kpiIndex]
+      if (newKpi?.id) {
+        await prisma.kpiAttachment.create({
+          data: {
+            kpiId: newKpi.id,
+            fileName: att.fileName,
+            filePath: att.filePath,
+            mimeType: att.mimeType,
+            fileSize: att.fileSize,
+          },
+        })
+      }
+    }
 
     return NextResponse.json(report)
   } catch (error) {

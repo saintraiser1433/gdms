@@ -6,6 +6,7 @@ import {
   IconReport,
   IconSchool,
   IconUsers,
+  IconBook2,
 } from "@tabler/icons-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -19,7 +20,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarSeparator,
 } from "@/components/ui/sidebar"
 import { useSession } from "next-auth/react"
 
@@ -50,6 +50,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           url: "/admin/users",
           icon: IconUsers,
         },
+        {
+          title: "Report Catalogs",
+          url: "/admin/catalog",
+          icon: IconBook2,
+        },
       ]
     : [
         {
@@ -61,6 +66,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           title: "My Reports",
           url: "/reports",
           icon: IconReport,
+        },
+        {
+          title: "Report Catalogs",
+          url: "/catalog",
+          icon: IconBook2,
         },
       ]
 
@@ -78,6 +88,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   src="/logo/school-logo.png"
                   alt="Logo"
                   className="size-8 rounded-full object-contain"
+                  crossOrigin="anonymous"
                 />
                 <span
                   className="text-base font-semibold bg-[linear-gradient(to_right,var(--foreground)_50%,#800020_50%)] bg-clip-text text-transparent"
@@ -96,7 +107,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={navItems} />
       </SidebarContent>
       <SidebarFooter>
-        <SidebarSeparator className="mb-2" />
+        <div className="-mx-2 mb-2 w-[calc(100%+1rem)] shrink-0">
+          <Separator orientation="horizontal" className="bg-sidebar-border h-px w-full" />
+        </div>
         <NavUser
           user={{
             name: session?.user?.name || "User",

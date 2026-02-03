@@ -10,6 +10,7 @@ import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { toast } from "sonner"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CreateReportModal } from "@/components/create-report-modal"
 import { DataTableWrapper } from "@/components/data-table-wrapper"
 import { StatusBadge } from "@/components/status-badge"
@@ -45,6 +46,11 @@ export default function ReportsPage() {
   const [isDeleting, setIsDeleting] = useState(false)
 
   const isProgramHead = session?.user?.role === "PROGRAM_HEAD"
+
+  const draftReports = reports.filter((r) => r.status === "DRAFT")
+  const submittedReports = reports.filter((r) => r.status === "SUBMITTED")
+  const approvedReports = reports.filter((r) => r.status === "APPROVED")
+  const disapprovedReports = reports.filter((r) => r.status === "DISAPPROVED")
 
   useEffect(() => {
     fetchReports()
@@ -97,26 +103,7 @@ export default function ReportsPage() {
     }
   }
 
-  const getStatusBadge = (status: string) => {
-    const variants: Record<string, "secondary" | "default" | "outline"> = {
-      DRAFT: "secondary",
-      SUBMITTED: "default",
-      APPROVED: "outline",
-      DISAPPROVED: "outline",
-    }
-    return (
-      <StatusBadge
-        status={status}
-        className={
-          status === "APPROVED"
-            ? "border-green-200 bg-green-50 text-green-800 dark:border-green-900 dark:bg-green-950 dark:text-green-300"
-            : status === "DISAPPROVED"
-            ? "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-300"
-            : ""
-        }
-      />
-    )
-  }
+  const getStatusBadge = (status: string) => <StatusBadge status={status} />
 
   const columns = [
     {
@@ -234,14 +221,165 @@ export default function ReportsPage() {
             <CardContent>
               {isLoading ? (
                 <div className="text-muted-foreground py-8">Loading...</div>
+              ) : isProgramHead ? (
+                <Tabs defaultValue="submitted" className="w-full">
+                  <TabsList>
+                    <TabsTrigger value="submitted">
+                      Submitted ({submittedReports.length})
+                    </TabsTrigger>
+                    <TabsTrigger value="draft">
+                      Draft ({draftReports.length})
+                    </TabsTrigger>
+                    <TabsTrigger value="approved">
+                      Approved ({approvedReports.length})
+                    </TabsTrigger>
+                    <TabsTrigger value="disapproved">
+                      Disapproved ({disapprovedReports.length})
+                    </TabsTrigger>
+                    <TabsTrigger value="all">
+                      All ({reports.length})
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="submitted" className="mt-4">
+                    <DataTableWrapper
+                      columns={columns}
+                      data={submittedReports}
+                      getRowId={(row) => row.id}
+                      emptyMessage="No submitted reports"
+                      showCreateReportButton={true}
+                      onCreateReportClick={() => setCreateModalOpen(true)}
+                      searchPlaceholder="Search reports..."
+                      getSearchableText={(row) =>
+                        `${row.programName} ${row.course} ${row.schoolYear} ${row.status} ${row.createdBy.name}`
+                      }
+                      filters={[
+                        {
+                          columnId: "status",
+                          label: "Status",
+                          options: [
+                            { value: "DRAFT", label: "Draft" },
+                            { value: "SUBMITTED", label: "Submitted" },
+                            { value: "APPROVED", label: "Approved" },
+                            { value: "DISAPPROVED", label: "Disapproved" },
+                          ],
+                          getValue: (row) => row.status,
+                        },
+                      ]}
+                    />
+                  </TabsContent>
+                  <TabsContent value="draft" className="mt-4">
+                    <DataTableWrapper
+                      columns={columns}
+                      data={draftReports}
+                      getRowId={(row) => row.id}
+                      emptyMessage="No draft reports"
+                      showCreateReportButton={true}
+                      onCreateReportClick={() => setCreateModalOpen(true)}
+                      searchPlaceholder="Search reports..."
+                      getSearchableText={(row) =>
+                        `${row.programName} ${row.course} ${row.schoolYear} ${row.status} ${row.createdBy.name}`
+                      }
+                      filters={[
+                        {
+                          columnId: "status",
+                          label: "Status",
+                          options: [
+                            { value: "DRAFT", label: "Draft" },
+                            { value: "SUBMITTED", label: "Submitted" },
+                            { value: "APPROVED", label: "Approved" },
+                            { value: "DISAPPROVED", label: "Disapproved" },
+                          ],
+                          getValue: (row) => row.status,
+                        },
+                      ]}
+                    />
+                  </TabsContent>
+                  <TabsContent value="approved" className="mt-4">
+                    <DataTableWrapper
+                      columns={columns}
+                      data={approvedReports}
+                      getRowId={(row) => row.id}
+                      emptyMessage="No approved reports"
+                      showCreateReportButton={false}
+                      searchPlaceholder="Search reports..."
+                      getSearchableText={(row) =>
+                        `${row.programName} ${row.course} ${row.schoolYear} ${row.status} ${row.createdBy.name}`
+                      }
+                      filters={[
+                        {
+                          columnId: "status",
+                          label: "Status",
+                          options: [
+                            { value: "DRAFT", label: "Draft" },
+                            { value: "SUBMITTED", label: "Submitted" },
+                            { value: "APPROVED", label: "Approved" },
+                            { value: "DISAPPROVED", label: "Disapproved" },
+                          ],
+                          getValue: (row) => row.status,
+                        },
+                      ]}
+                    />
+                  </TabsContent>
+                  <TabsContent value="disapproved" className="mt-4">
+                    <DataTableWrapper
+                      columns={columns}
+                      data={disapprovedReports}
+                      getRowId={(row) => row.id}
+                      emptyMessage="No disapproved reports"
+                      showCreateReportButton={false}
+                      searchPlaceholder="Search reports..."
+                      getSearchableText={(row) =>
+                        `${row.programName} ${row.course} ${row.schoolYear} ${row.status} ${row.createdBy.name}`
+                      }
+                      filters={[
+                        {
+                          columnId: "status",
+                          label: "Status",
+                          options: [
+                            { value: "DRAFT", label: "Draft" },
+                            { value: "SUBMITTED", label: "Submitted" },
+                            { value: "APPROVED", label: "Approved" },
+                            { value: "DISAPPROVED", label: "Disapproved" },
+                          ],
+                          getValue: (row) => row.status,
+                        },
+                      ]}
+                    />
+                  </TabsContent>
+                  <TabsContent value="all" className="mt-4">
+                    <DataTableWrapper
+                      columns={columns}
+                      data={reports}
+                      getRowId={(row) => row.id}
+                      emptyMessage="No reports yet"
+                      showCreateReportButton={false}
+                      searchPlaceholder="Search reports..."
+                      getSearchableText={(row) =>
+                        `${row.programName} ${row.course} ${row.schoolYear} ${row.status} ${row.createdBy.name}`
+                      }
+                      filters={[
+                        {
+                          columnId: "status",
+                          label: "Status",
+                          options: [
+                            { value: "DRAFT", label: "Draft" },
+                            { value: "SUBMITTED", label: "Submitted" },
+                            { value: "APPROVED", label: "Approved" },
+                            { value: "DISAPPROVED", label: "Disapproved" },
+                          ],
+                          getValue: (row) => row.status,
+                        },
+                      ]}
+                    />
+                  </TabsContent>
+                </Tabs>
               ) : (
                 <DataTableWrapper
                   columns={columns}
                   data={reports}
                   getRowId={(row) => row.id}
                   emptyMessage="No reports yet"
-                  showCreateReportButton={isProgramHead}
-                  onCreateReportClick={isProgramHead ? () => setCreateModalOpen(true) : undefined}
+                  showCreateReportButton={false}
                   searchPlaceholder="Search reports..."
                   getSearchableText={(row) =>
                     `${row.programName} ${row.course} ${row.schoolYear} ${row.status} ${row.createdBy.name}`

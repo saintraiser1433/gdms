@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select"
 import { toast } from "sonner"
 import { RiAddLine, RiDeleteBinLine } from "@remixicon/react"
+import { KpiFileUpload } from "@/components/kpi-file-upload"
 
 export interface TimeEntry {
   period: "T1" | "T2" | "T3" | "T4"
@@ -45,6 +46,7 @@ export interface Strategy {
 }
 
 export interface KPI {
+  clientId: string
   description: string
   strategies: Strategy[]
 }
@@ -61,7 +63,7 @@ const MONTHS = [
   "July", "August", "September", "October", "November", "December",
 ]
 
-const STATUS_OPTIONS = ["Not Started", "In Progress", "Completed", "Cancelled"]
+const STATUS_OPTIONS = ["Not Started", "In Progress", "Completed", "Not Completed", "Cancelled"]
 
 const IMPLEMENTATION_PERIOD_YEARS = Array.from({ length: 91 }, (_, i) =>
   String(2000 + i)
@@ -129,6 +131,7 @@ function mapReportToForm(report: {
       kpis: (obj.kpis ?? [])
         .sort((a, b) => ((a as { orderIndex?: number }).orderIndex ?? 0) - ((b as { orderIndex?: number }).orderIndex ?? 0))
         .map((kpi) => ({
+          clientId: (kpi as { id?: string }).id ?? crypto.randomUUID(),
           description: kpi.description ?? "",
           strategies: (kpi.strategies ?? [])
             .sort((a, b) => ((a as { orderIndex?: number }).orderIndex ?? 0) - ((b as { orderIndex?: number }).orderIndex ?? 0))
@@ -228,11 +231,20 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
 
   const [reportStatus, setReportStatus] = useState<string | null>(null)
 
+  const [kpiFiles, setKpiFiles] = useState<Record<string, File[]>>({})
+
+  const getKpiFiles = (clientId: string) => kpiFiles[clientId] ?? []
+
+  const setKpiFilesForKey = (clientId: string, files: File[]) => {
+    setKpiFiles((prev) => ({ ...prev, [clientId]: files }))
+  }
+
   const [objectives, setObjectives] = useState<Objective[]>([
     {
       title: "",
       kpis: [
         {
+          clientId: crypto.randomUUID(),
           description: "",
           strategies: [createEmptyStrategy()],
         },
@@ -245,7 +257,7 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
       ...objectives,
       {
         title: "",
-        kpis: [{ description: "", strategies: [createEmptyStrategy()] }],
+        kpis: [{ clientId: crypto.randomUUID(), description: "", strategies: [createEmptyStrategy()] }],
       },
     ])
   }
@@ -257,6 +269,7 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
   const addKPI = (objIndex: number) => {
     const newObjectives = [...objectives]
     newObjectives[objIndex].kpis.push({
+      clientId: crypto.randomUUID(),
       description: "",
       strategies: [createEmptyStrategy()],
     })
@@ -323,11 +336,11 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
     stratIndex: number,
     entryIndex: number,
     field: keyof TimeEntry,
-    value: string | number
+    value: string | number | boolean
   ) => {
     const newObjectives = [...objectives]
     const entry = newObjectives[objIndex].kpis[kpiIndex].strategies[stratIndex].timeEntries[entryIndex]
-    ;(entry as Record<string, unknown>)[field] = value
+    ;(entry as unknown as Record<string, unknown>)[field] = value
     setObjectives(newObjectives)
   }
 
@@ -347,6 +360,89 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
           }
         }
       }
+
+      // Validation required when submitting (not for save as draft)
+      if (!saveAsDraft) {
+        if (!programName?.trim()) {
+          toast.error("Program/Project Name is required.")
+          setIsSubmitting(false)
+          return
+        }
+        if (!implementationPeriod?.trim()) {
+          toast.error("Implementation Period is required.")
+          setIsSubmitting(false)
+          return
+        }
+        if (!responsiblePerson?.trim()) {
+          toast.error("Person/Unit Responsible is required.")
+          setIsSubmitting(false)
+          return
+        }
+        if (!location?.trim()) {
+          toast.error("Location is required.")
+          setIsSubmitting(false)
+          return
+        }
+        if (!courseToSubmit?.trim()) {
+          toast.error("Course is required. Please wait for it to load or refresh the page.")
+          setIsSubmitting(false)
+          return
+        }
+        if (!schoolYear?.trim()) {
+          toast.error("School Year is required.")
+          setIsSubmitting(false)
+          return
+        }
+        if (!objectives.length || objectives.every((o) => !o.title?.trim())) {
+          toast.error("At least one Objective with a title is required.")
+          setIsSubmitting(false)
+          return
+        }
+        for (let oi = 0; oi < objectives.length; oi++) {
+          const obj = objectives[oi]
+          if (!obj.title?.trim()) {
+            toast.error(`Objective ${oi + 1}: Title is required.`)
+            setIsSubmitting(false)
+            return
+          }
+          if (!obj.kpis?.length) {
+            toast.error(`Objective ${oi + 1}: At least one KPI is required.`)
+            setIsSubmitting(false)
+            return
+          }
+          for (let ki = 0; ki < obj.kpis.length; ki++) {
+            const kpi = obj.kpis[ki]
+            if (!kpi.description?.trim()) {
+              toast.error(`Objective ${oi + 1}, KPI ${ki + 1}: KPI description is required.`)
+              setIsSubmitting(false)
+              return
+            }
+            if (!kpi.strategies?.length) {
+              toast.error(`Objective ${oi + 1}, KPI ${ki + 1}: At least one Strategy is required.`)
+              setIsSubmitting(false)
+              return
+            }
+            for (let si = 0; si < kpi.strategies.length; si++) {
+              const strat = kpi.strategies[si]
+              if (!strat.description?.trim()) {
+                toast.error(
+                  `Objective ${oi + 1}, KPI ${ki + 1}, Strategy ${si + 1}: Strategy description is required.`
+                )
+                setIsSubmitting(false)
+                return
+              }
+              if (!strat.target?.trim()) {
+                toast.error(
+                  `Objective ${oi + 1}, KPI ${ki + 1}, Strategy ${si + 1}: Target is required.`
+                )
+                setIsSubmitting(false)
+                return
+              }
+            }
+          }
+        }
+      }
+
       if (!courseToSubmit) {
         toast.error("Your course is not loaded yet. Please wait a moment and try again.")
         setIsSubmitting(false)
@@ -371,7 +467,7 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
 
       const normalizedObjectives = objectives.map((obj) => ({
         ...obj,
-        kpis: obj.kpis.map((kpi) => ({
+        kpis: obj.kpis.map(({ clientId: _cid, ...kpi }) => ({
           ...kpi,
           strategies: kpi.strategies.map((strat) => ({
             ...strat,
@@ -394,6 +490,7 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
         course: courseToSubmit,
         schoolYear,
         objectives: normalizedObjectives,
+        ...(!!reportId && saveAsDraft && { status: "DRAFT" }),
       }
 
       const isEdit = !!reportId
@@ -414,6 +511,30 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
       }
 
       const report = await response.json()
+
+      // Upload KPI attachments
+      for (let oi = 0; oi < objectives.length; oi++) {
+        const obj = objectives[oi]
+        const resObj = report.objectives?.[oi]
+        if (!resObj?.kpis) continue
+        for (let ki = 0; ki < obj.kpis.length; ki++) {
+          const kpi = obj.kpis[ki]
+          const resKpi = resObj.kpis[ki]
+          const filesToUpload = getKpiFiles(kpi.clientId)
+          if (filesToUpload.length && resKpi?.id) {
+            const fd = new FormData()
+            filesToUpload.forEach((f) => fd.append("files", f))
+            const uploadRes = await fetch(
+              `/api/reports/${report.id}/kpis/${resKpi.id}/attachments`,
+              { method: "POST", body: fd }
+            )
+            if (!uploadRes.ok) {
+              const err = await uploadRes.json().catch(() => ({}))
+              throw new Error(err.error ?? "Failed to upload files")
+            }
+          }
+        }
+      }
 
       if (!saveAsDraft) {
         const submitResponse = await fetch(`/api/reports/${report.id}/submit`, {
@@ -470,7 +591,7 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
                 <Combobox
                   items={IMPLEMENTATION_PERIOD_YEARS}
                   value={implementationPeriod}
-                  onValueChange={setImplementationPeriod}
+                  onValueChange={(v) => setImplementationPeriod(v ?? "")}
                   required
                 >
                   <ComboboxInput
@@ -615,6 +736,15 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
                           }
                           placeholder="Enter target"
                           required
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-2 w-full">
+                        <Label>Documents / Pictures</Label>
+                        <KpiFileUpload
+                          files={getKpiFiles(kpi.clientId)}
+                          onFilesChange={(files) => setKpiFilesForKey(kpi.clientId, files)}
+                          disabled={isSubmitting}
                         />
                       </div>
 

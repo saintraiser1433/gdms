@@ -13,7 +13,7 @@ import { useParams } from "next/navigation"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { StatusBadge } from "@/components/status-badge"
 import { exportReportToExcel } from "@/lib/excel-export"
-import { RiFileExcel2Line, RiPrinterLine, RiEditLine, RiPushpin2Line } from "@remixicon/react"
+import { RiFileExcel2Line, RiPrinterLine, RiEditLine, RiPushpin2Line, RiFileLine, RiFilePdfLine, RiFileWordLine, RiFileExcelLine, RiDownloadLine, RiEyeLine } from "@remixicon/react"
 import {
   Dialog,
   DialogContent,
@@ -65,6 +65,8 @@ export default function ReportViewPage() {
   const [commentPinTarget, setCommentPinTarget] = useState<{ type: "SECTION" | "KPI" | "CELL"; id: string; label: string } | null>(null)
   const [commentText, setCommentText] = useState("")
   const [isSubmittingComment, setIsSubmittingComment] = useState(false)
+  const [documentsDialogOpen, setDocumentsDialogOpen] = useState(false)
+  const [documentsDialogAttachments, setDocumentsDialogAttachments] = useState<{ id: string; fileName: string; mimeType: string }[]>([])
 
   const openPinComment = (type: "SECTION" | "KPI" | "CELL", id: string, label: string) => {
     setCommentPinTarget({ type, id, label })
@@ -283,6 +285,22 @@ export default function ReportViewPage() {
                         ))}
                       </div>
                     )}
+                    {kpi.attachments && kpi.attachments.length > 0 && (
+                      <div className="mb-4">
+                        <Button
+                          type="button"
+                          variant="default"
+                          size="sm"
+                          onClick={() => {
+                            setDocumentsDialogAttachments(kpi.attachments)
+                            setDocumentsDialogOpen(true)
+                          }}
+                        >
+                          <RiFileLine className="h-4 w-4 mr-2" />
+                          View Documents ({kpi.attachments.length})
+                        </Button>
+                      </div>
+                    )}
                     {kpi.strategies.map((strategy: any, stratIndex: number) => (
                       <div key={strategy.id} className="mb-4 pl-4 border-l-2">
                         <p className="font-medium mb-2">
@@ -403,6 +421,74 @@ export default function ReportViewPage() {
               {isSubmittingComment ? "Adding..." : "Pin Comment"}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={documentsDialogOpen} onOpenChange={setDocumentsDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Documents / Pictures</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto grid gap-4 py-4">
+            {documentsDialogAttachments.map((att: { id: string; fileName: string; mimeType: string }) => {
+              const isImage = att.mimeType?.startsWith("image/")
+              const ext = att.fileName?.split(".").pop()?.toLowerCase() ?? ""
+              const isPdf = ext === "pdf" || att.mimeType === "application/pdf"
+              const isWord = ["doc", "docx"].includes(ext) || att.mimeType?.includes("word") || att.mimeType === "application/msword"
+              const isExcel = ["xls", "xlsx"].includes(ext) || att.mimeType?.includes("sheet") || att.mimeType === "application/vnd.ms-excel"
+              const FileIcon = isPdf ? RiFilePdfLine : isWord ? RiFileWordLine : isExcel ? RiFileExcelLine : RiFileLine
+              const url = `/api/attachments/${att.id}`
+              return (
+                <div
+                  key={att.id}
+                  className="flex flex-col gap-2 rounded-lg border p-4"
+                >
+                  <div className="flex items-center gap-3">
+                    {isImage ? (
+                      <div className="shrink-0 w-24 h-24 rounded overflow-hidden bg-muted">
+                        <img
+                          src={url}
+                          alt={att.fileName}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="shrink-0 w-24 h-24 rounded flex items-center justify-center bg-muted">
+                        <FileIcon className="h-12 w-12 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate" title={att.fileName}>
+                        {att.fileName}
+                      </p>
+                      <div className="flex gap-2 mt-2">
+                        <Button
+                          variant="default"
+                          size="sm"
+                          asChild
+                        >
+                          <a href={url} target="_blank" rel="noopener noreferrer">
+                            <RiEyeLine className="h-4 w-4 mr-1" />
+                            View
+                          </a>
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          asChild
+                        >
+                          <a href={url} download={att.fileName}>
+                            <RiDownloadLine className="h-4 w-4 mr-1" />
+                            Download
+                          </a>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </DialogContent>
       </Dialog>
     </SidebarProvider>

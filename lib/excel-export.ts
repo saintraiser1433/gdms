@@ -55,9 +55,9 @@ function getStatusColor(status: string): string | undefined {
   const s = status.toLowerCase()
   if (s === "completed" || s === "c") return "90EE90"
   if (s === "not started" || s === "ns") return "FFB6C1"
-  if (s === "in progress" || s === "ip") return "FFFFE0"
+  if (s === "in progress" || s === "ip") return "ADD8E6"
   if (s === "cancelled" || s === "nc") return "FFA500"
-  if (s.includes("not completed")) return "FFB6C1"
+  if (s.includes("not completed")) return "FFFFE0"
   return undefined
 }
 

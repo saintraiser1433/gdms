@@ -60,6 +60,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null
         }
 
+        // Block login for inactive users (e.g. inactive program heads)
+        if (user.status === "INACTIVE") {
+          return null
+        }
+
         return {
           id: user.id,
           email: user.email,
