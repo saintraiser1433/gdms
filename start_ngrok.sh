@@ -3,6 +3,9 @@
 NGROK_URL="numinous-manie-homotaxially.ngrok-free.dev"
 PORT=3000
 TOKEN="399EmyoLakejo1jlGTYKvFGkpcE_39S8euHhJXzZFv5KJNfMj"
+cd .next/standalone
+node server.js
+
 
 echo "Adding Ngrok authtoken..."
 ngrok config add-authtoken "$TOKEN"
@@ -19,3 +22,5 @@ echo "Starting Ngrok tunnel..."
 ngrok http --url="$NGROK_URL" "$PORT"
 
 read -p "Press Enter to close..."
+
+

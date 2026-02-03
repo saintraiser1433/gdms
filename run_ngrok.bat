@@ -5,7 +5,8 @@ set "TOKEN=399EmyoLakejo1jlGTYKvFGkpcE_39S8euHhJXzZFv5KJNfMj"
 
 echo Adding Ngrok authtoken...
 ngrok config add-authtoken %TOKEN%
-
+cd .next/standalone
+node server.js
 if %errorlevel%==0 (
     echo Authtoken added successfully!
 ) else (

@@ -245,7 +245,7 @@ export async function exportReportToExcel(report: Report): Promise<void> {
             for (let c = 0; c < 5; c++) {
               const cell = worksheet.getCell(row, startCol + c)
               cell.value = c >= 2 ? 0 : ""
-              cell.style = { border: thinBorder, alignment: c >= 2 ? ("right" as const) : ("top" as const), ...(c >= 2 ? { numFmt: "#,##0" } : {}) }
+              cell.style = { border: thinBorder, alignment: c >= 2 ? { horizontal: "right" as const } : { vertical: "top" as const }, ...(c >= 2 ? { numFmt: "#,##0" } : {}) }
             }
           }
         }

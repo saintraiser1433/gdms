@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
@@ -34,7 +34,7 @@ interface Report {
   }
 }
 
-export default function ReportsPage() {
+function ReportsPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { data: session } = useSession()
@@ -422,5 +422,13 @@ export default function ReportsPage() {
         />
       </SidebarInset>
     </SidebarProvider>
+  )
+}
+
+export default function ReportsPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading reports...</div>}>
+      <ReportsPageContent />
+    </Suspense>
   )
 }

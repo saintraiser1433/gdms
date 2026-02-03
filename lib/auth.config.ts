@@ -2,6 +2,7 @@ import type { NextAuthConfig } from "next-auth"
 
 // Edge-compatible config - NO Prisma, bcrypt, or other Node.js modules
 export const authConfig = {
+  trustHost: true,
   pages: {
     signIn: "/login",
   },
