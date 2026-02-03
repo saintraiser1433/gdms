@@ -10,6 +10,7 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
+    "db:flush": "node scripts/flush-db.js",
     "db:reset": "node scripts/reset-db.js && npm run db:push && npm run db:seed"
   },
   "prisma": {
