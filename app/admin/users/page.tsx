@@ -1,12 +1,12 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { RiAddLine, RiEditLine } from "@remixicon/react"
+import { RiAddLine, RiEditLine, RiMore2Line } from "@remixicon/react"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { toast } from "sonner"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { DataTableWrapper } from "@/components/data-table-wrapper"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -291,15 +291,24 @@ export default function UsersPage() {
       id: "actions",
       header: "",
       cell: (row: User) => (
-        <Button
-          size="sm"
-          variant="outline"
-          className="h-8"
-          onClick={() => openEditModal(row)}
-        >
-          <RiEditLine className="h-4 w-4 mr-1" />
-          Edit
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 w-8 p-0 data-[state=open]:bg-muted"
+            >
+              <RiMore2Line className="h-4 w-4" />
+              <span className="sr-only">Actions</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => openEditModal(row)}>
+              <RiEditLine className="h-4 w-4 mr-2" />
+              Edit
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       ),
       headerClassName: "w-24",
     },
@@ -311,20 +320,20 @@ export default function UsersPage() {
       <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-          <Card className="pb-2">
-            <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-              <div>
-                <CardTitle className="text-2xl">User Management</CardTitle>
-                <CardDescription>
-                  Add and manage program heads who can create and submit reports
-                </CardDescription>
-              </div>
-              <Button onClick={() => setAddModalOpen(true)}>
-                <RiAddLine className="mr-2 h-4 w-4" />
-                Add Program Head
-              </Button>
-            </CardHeader>
-            <CardContent>
+          <div className="flex flex-row flex-wrap items-start justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold">User Management</h1>
+              <p className="text-muted-foreground text-sm mt-1">
+                Add and manage program heads who can create and submit reports
+              </p>
+            </div>
+            <Button onClick={() => setAddModalOpen(true)}>
+              <RiAddLine className="mr-2 h-4 w-4" />
+              Add Program Head
+            </Button>
+          </div>
+          <Card className="py-2">
+            <CardContent className="pt-2 pb-2">
               {isLoading ? (
                 <div className="py-8 text-muted-foreground">Loading...</div>
               ) : (

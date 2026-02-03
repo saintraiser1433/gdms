@@ -160,7 +160,7 @@ function mapReportToForm(report: {
 
 export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReportFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [courses, setCourses] = useState<{ id: string; name: string }[]>([])
+  const [courses, setCourses] = useState<{ id: string; name: string; abbreviation?: string }[]>([])
 
   const [programName, setProgramName] = useState("")
   const [implementationPeriod, setImplementationPeriod] = useState("")
@@ -221,8 +221,11 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
         .then((res) => res.ok && res.json())
         .then((data) => {
           if (data?.role === "PROGRAM_HEAD") {
-            if (data.name) setResponsiblePerson(data.name)
             if (data.course?.name) setCourse(data.course.name)
+            if (data.name) {
+              const abbrev = data.course?.abbreviation || data.course?.name || ""
+              setResponsiblePerson(abbrev ? `${data.name} / ${abbrev}` : data.name)
+            }
           }
         })
         .catch(() => {})
@@ -467,25 +470,37 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
 
       const normalizedObjectives = objectives.map((obj) => ({
         ...obj,
-        kpis: obj.kpis.map(({ clientId: _cid, ...kpi }) => ({
-          ...kpi,
-          strategies: kpi.strategies.map((strat) => ({
-            ...strat,
-            timeEntries: strat.timeEntries.map((entry, ei) => {
-            const { addStatusComment, ...rest } = entry
-            return {
-              ...rest,
-              period: PERIODS[Math.min(ei, 3)] ?? ("T4" as const),
-            }
-          }),
-          })),
-        })),
+        kpis: obj.kpis.map(({ clientId: _clientId, ...kpi }) => {
+          void _clientId // excluded from payload
+          return {
+            ...kpi,
+            strategies: kpi.strategies.map((strat) => ({
+              ...strat,
+              timeEntries: strat.timeEntries.map((entry, ei) => {
+                const { addStatusComment: _addStatusComment, ...rest } = entry
+                void _addStatusComment // excluded from payload
+                return {
+                  ...rest,
+                  period: PERIODS[Math.min(ei, 3)] ?? ("T4" as const),
+                }
+              }),
+            })),
+          }
+        }),
       }))
+
+      const personPart = responsiblePerson.includes(" / ")
+        ? responsiblePerson.split(" / ")[0]!.trim()
+        : responsiblePerson.trim()
+      const courseAbbrev =
+        courses.find((c) => c.name === courseToSubmit)?.abbreviation || courseToSubmit
+      const responsiblePersonFormatted =
+        courseAbbrev ? `${personPart} / ${courseAbbrev}` : personPart
 
       const reportData = {
         programName,
         implementationPeriod,
-        responsiblePerson,
+        responsiblePerson: responsiblePersonFormatted,
         location,
         course: courseToSubmit,
         schoolYear,
@@ -619,7 +634,7 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
                   onChange={(e) => setResponsiblePerson(e.target.value)}
                   required
                   disabled
-                  className="bg-muted"
+                  className="bg-white dark:bg-background"
                 />
               </div>
               <div className="flex flex-col gap-2 w-full">
@@ -637,7 +652,7 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
                   id="course"
                   value={course}
                   readOnly
-                  className="bg-muted"
+                  className="bg-white dark:bg-background"
                 />
               </div>
               <div className="flex flex-col gap-2 w-full">

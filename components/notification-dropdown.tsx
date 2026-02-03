@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Bell, Inbox } from "lucide-react"
+import { RiCheckLine, RiCloseLine, RiSendPlaneLine } from "@remixicon/react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
@@ -22,6 +24,14 @@ export interface Notification {
 
 interface NotificationDropdownProps {
   notifications?: Notification[]
+}
+
+function getNotificationIcon(title: string) {
+  const t = title?.toLowerCase() ?? ""
+  if (t.includes("approved")) return <RiCheckLine className="size-4 shrink-0 text-green-600 dark:text-green-400" />
+  if (t.includes("disapproved")) return <RiCloseLine className="size-4 shrink-0 text-red-600 dark:text-red-400" />
+  if (t.includes("submitted")) return <RiSendPlaneLine className="size-4 shrink-0 text-blue-600 dark:text-blue-400" />
+  return null
 }
 
 function formatNotificationDate(iso: string): string {
@@ -94,11 +104,14 @@ export function NotificationDropdown({ notifications: initialNotifications }: No
         </div>
         {hasNotifications ? (
           <div className="max-h-[280px] overflow-y-auto">
-            <div className="space-y-1 p-1">
-              {notifications.map((n) => {
+            <div className="p-1">
+              {notifications.map((n, index) => {
                 const content = (
                   <div className="flex flex-col items-start gap-1">
-                    <span className="font-medium">{n.title}</span>
+                    <div className="flex items-center gap-2">
+                      {getNotificationIcon(n.title)}
+                      <span className="font-medium">{n.title}</span>
+                    </div>
                     <span className="text-muted-foreground text-sm">{n.message}</span>
                     <span className="text-muted-foreground text-xs">
                       {formatNotificationDate(n.createdAt)}
@@ -108,7 +121,7 @@ export function NotificationDropdown({ notifications: initialNotifications }: No
                 const handleClick = () => {
                   if (!n.read) markAsRead(n.id)
                 }
-                return n.reportId ? (
+                const item = n.reportId ? (
                   <DropdownMenuItem key={n.id} asChild>
                     <Link
                       href={`/reports/${n.reportId}`}
@@ -126,6 +139,12 @@ export function NotificationDropdown({ notifications: initialNotifications }: No
                   >
                     {content}
                   </DropdownMenuItem>
+                )
+                return (
+                  <div key={n.id} className="contents">
+                    {item}
+                    {index < notifications.length - 1 && <DropdownMenuSeparator />}
+                  </div>
                 )
               })}
             </div>

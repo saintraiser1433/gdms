@@ -10,8 +10,10 @@ export const authConfig = {
       const isLoggedIn = !!auth?.user
       const isLoginPage = nextUrl.pathname === "/login"
       const isAuthApi = nextUrl.pathname.startsWith("/api/auth")
+      const isRoot = nextUrl.pathname === "/"
 
       if (isAuthApi) return true
+      if (isRoot) return isLoggedIn ? Response.redirect(new URL("/dashboard", nextUrl)) : Response.redirect(new URL("/login", nextUrl))
       if (isLoginPage) return isLoggedIn ? Response.redirect(new URL("/dashboard", nextUrl)) : true
       if (!isLoggedIn) return false
 
@@ -27,8 +29,9 @@ export const authConfig = {
     },
     jwt({ token, user }) {
       if (user) {
-        token.id = (user as { id?: string }).id
-        token.role = (user as { role?: string }).role
+        const u = user as { id?: string; role?: string }
+        if (u.id) token.id = u.id
+        if (u.role) token.role = u.role
       }
       return token
     },

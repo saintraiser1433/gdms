@@ -8,7 +8,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { toast } from "sonner"
-import { RiEyeLine, RiCheckLine, RiCloseLine } from "@remixicon/react"
+import { RiEyeLine, RiCheckLine, RiCloseLine, RiMore2Line } from "@remixicon/react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DataTableWrapper } from "@/components/data-table-wrapper"
 import { StatusBadge } from "@/components/status-badge"
@@ -21,6 +21,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface Report {
   id: string
@@ -101,41 +107,44 @@ function ReportTable({
       id: "actions",
       header: "",
       cell: (row: Report) => (
-        <div className="flex items-center gap-1">
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-8 w-8 p-0"
-            onClick={() => router.push(`/reports/${row.id}`)}
-          >
-            <RiEyeLine className="h-4 w-4" />
-            <span className="sr-only">View</span>
-          </Button>
-          {row.status === "SUBMITTED" && (
-            <>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-950"
-                onClick={() => onApprove(row)}
-              >
-                <RiCheckLine className="h-4 w-4" />
-                <span className="sr-only">Approve</span>
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
-                onClick={() => onDisapprove(row)}
-              >
-                <RiCloseLine className="h-4 w-4" />
-                <span className="sr-only">Disapprove</span>
-              </Button>
-            </>
-          )}
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 w-8 p-0 data-[state=open]:bg-muted"
+            >
+              <RiMore2Line className="h-4 w-4" />
+              <span className="sr-only">Actions</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => router.push(`/reports/${row.id}`)}>
+              <RiEyeLine className="h-4 w-4 mr-2" />
+              View
+            </DropdownMenuItem>
+            {row.status === "SUBMITTED" && (
+              <>
+                <DropdownMenuItem
+                  onClick={() => onApprove(row)}
+                  className="text-green-600 focus:text-green-600 dark:text-green-400 dark:focus:text-green-400"
+                >
+                  <RiCheckLine className="h-4 w-4 mr-2" />
+                  Approve
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => onDisapprove(row)}
+                >
+                  <RiCloseLine className="h-4 w-4 mr-2" />
+                  Disapprove
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       ),
-      headerClassName: "w-32",
+      headerClassName: "w-24",
     },
   ]
 
@@ -188,7 +197,6 @@ function ReportTable({
 }
 
 export default function AdminPage() {
-  const router = useRouter()
   const [reports, setReports] = useState<Report[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [approveDialogOpen, setApproveDialogOpen] = useState(false)
@@ -208,7 +216,7 @@ export default function AdminPage() {
         const data = await response.json()
         setReports(data)
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch reports")
     } finally {
       setIsLoading(false)
@@ -241,7 +249,7 @@ export default function AdminPage() {
       } else {
         toast.error("Failed to approve report")
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to approve report")
     } finally {
       setIsApproving(false)
@@ -264,7 +272,7 @@ export default function AdminPage() {
       } else {
         toast.error("Failed to disapprove report")
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to disapprove report")
     } finally {
       setIsDisapproving(false)
@@ -288,41 +296,14 @@ export default function AdminPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium">Pending Review</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{submittedReports.length}</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium">Approved</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{approvedReports.length}</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium">Disapproved</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{disapprovedReports.length}</div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card className="pb-2">
-            <CardHeader>
+          <Card className="py-2">
+            <CardHeader className="pb-2">
               <CardTitle>Reports</CardTitle>
               <CardDescription>
                 Browse reports by status and take action on pending submissions
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-2 pb-2">
               <Tabs defaultValue="submitted" className="w-full">
                 <TabsList>
                   <TabsTrigger value="submitted">

@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { NextResponse } from "next/server"
@@ -15,7 +16,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const where: { status: string; course?: string } = { status: "APPROVED" }
+    const where: Prisma.ReportWhereInput = { status: "APPROVED" }
 
     if (session.user.role === "PROGRAM_HEAD") {
       const user = await prisma.user.findUnique({

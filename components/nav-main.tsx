@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { cn } from "@/lib/utils"
 import { usePathname } from "next/navigation"
 import { type Icon } from "@tabler/icons-react"
 
@@ -44,7 +45,7 @@ export function NavMain({
                   asChild
                   tooltip={item.title}
                   isActive={isActive}
-                  className={isActive ? "border-l-2 border-l-primary" : undefined}
+                  className={cn("text-xs", isActive && "border-l-2 border-l-primary")}
                 >
                   <Link href={item.url}>
                     {item.icon && <item.icon />}

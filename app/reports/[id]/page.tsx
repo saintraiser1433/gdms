@@ -13,7 +13,7 @@ import { useParams } from "next/navigation"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { StatusBadge } from "@/components/status-badge"
 import { exportReportToExcel } from "@/lib/excel-export"
-import { RiFileExcel2Line, RiPrinterLine, RiEditLine, RiPushpin2Line, RiFileLine, RiFilePdfLine, RiFileWordLine, RiFileExcelLine, RiDownloadLine, RiEyeLine } from "@remixicon/react"
+import { RiFileExcel2Line, RiEditLine, RiPushpin2Line, RiFileLine, RiFilePdfLine, RiFileWordLine, RiFileExcelLine, RiDownloadLine, RiEyeLine } from "@remixicon/react"
 import {
   Dialog,
   DialogContent,
@@ -22,6 +22,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
+import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 
 interface Comment {
@@ -33,6 +34,40 @@ interface Comment {
   createdBy: { name: string }
 }
 
+interface TimeEntry {
+  id: string
+  period: string
+  periodStartMonth: string
+  periodEndMonth: string
+  activities?: string
+  status?: string
+  statusComment?: string | null
+  budgetAllocated?: number
+  budgetSource?: string
+  budgetSpent?: number
+  variance?: number
+}
+
+interface Strategy {
+  id: string
+  description: string
+  target?: string
+  timeEntries: TimeEntry[]
+}
+
+interface Kpi {
+  id: string
+  description: string
+  attachments: { id: string; fileName: string; mimeType: string }[]
+  strategies: Strategy[]
+}
+
+interface Objective {
+  id: string
+  title: string
+  kpis: Kpi[]
+}
+
 interface Report {
   id: string
   programName: string
@@ -42,8 +77,8 @@ interface Report {
   course: string
   schoolYear: string
   status: string
-  objectives: any[]
-  createdBy: any
+  objectives: Objective[]
+  createdBy: { id: string; name: string; email: string }
   submittedAt: string | null
   reviewedAt: string | null
   comments?: Comment[]
@@ -113,7 +148,8 @@ export default function ReportViewPage() {
 
   useEffect(() => {
     fetchReport()
-  }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch on mount only
+  }, [params.id])
 
   const fetchReport = async () => {
     try {
@@ -122,15 +158,11 @@ export default function ReportViewPage() {
         const data = await response.json()
         setReport(data)
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch report")
     } finally {
       setIsLoading(false)
     }
-  }
-
-  const handlePrint = () => {
-    window.print()
   }
 
   const handleExportExcel = async () => {
@@ -176,10 +208,6 @@ export default function ReportViewPage() {
                 <RiFileExcel2Line className="w-4 h-4 mr-2" />
                 Download Excel
               </Button>
-              <Button onClick={handlePrint} variant="outline">
-                <RiPrinterLine className="w-4 h-4 mr-2" />
-                Print Report
-              </Button>
               <Button variant="outline" onClick={() => router.push(isAdmin ? "/admin" : "/reports")}>
                 Back
               </Button>
@@ -190,6 +218,7 @@ export default function ReportViewPage() {
             <CardHeader>
               <CardTitle>Report Information</CardTitle>
             </CardHeader>
+            <Separator className="mx-4 my-1" />
             <CardContent className="space-y-2">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -251,8 +280,9 @@ export default function ReportViewPage() {
                   ))}
                 </div>
               )}
+              <Separator className="mx-4 my-1" />
               <CardContent>
-                {objective.kpis.map((kpi: any, kpiIndex: number) => {
+                {objective.kpis.map((kpi: Kpi, kpiIndex: number) => {
                   const kpiComments = getCommentsFor("KPI", kpi.id)
                   return (
                   <div key={kpi.id} className="mb-6">
@@ -301,7 +331,7 @@ export default function ReportViewPage() {
                         </Button>
                       </div>
                     )}
-                    {kpi.strategies.map((strategy: any, stratIndex: number) => (
+                    {kpi.strategies.map((strategy: Strategy, stratIndex: number) => (
                       <div key={strategy.id} className="mb-4 pl-4 border-l-2">
                         <p className="font-medium mb-2">
                           Strategy {stratIndex + 1}: {strategy.description}
@@ -324,7 +354,7 @@ export default function ReportViewPage() {
                               </TableRow>
                             </TableHeader>
                             <TableBody>
-                              {strategy.timeEntries.map((entry: any) => (
+                              {strategy.timeEntries.map((entry: TimeEntry) => (
                                 <Fragment key={entry.id}>
                                 <TableRow className="border-border">
                                   <TableCell className="px-3">
@@ -446,6 +476,7 @@ export default function ReportViewPage() {
                   <div className="flex items-center gap-3">
                     {isImage ? (
                       <div className="shrink-0 w-24 h-24 rounded overflow-hidden bg-muted">
+                        {/* eslint-disable-next-line @next/next/no-img-element -- API-served image, auth required */}
                         <img
                           src={url}
                           alt={att.fileName}

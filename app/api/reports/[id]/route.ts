@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
+import type { ObjectiveInput } from "@/lib/report-types"
 import { NextResponse } from "next/server"
 
 export async function GET(
@@ -143,11 +144,11 @@ export async function PUT(
     } = body
 
     // Validate: budget spent must not exceed budget allocated
-    const hasBudgetViolation = (objectives ?? []).some((obj: any) =>
-      (obj.kpis ?? []).some((kpi: any) =>
-        (kpi.strategies ?? []).some((strat: any) =>
+    const hasBudgetViolation = (objectives ?? []).some((obj: ObjectiveInput) =>
+      (obj.kpis ?? []).some((kpi) =>
+        (kpi.strategies ?? []).some((strat) =>
           (strat.timeEntries ?? []).some(
-            (entry: any) => (entry.budgetSpent ?? 0) > (entry.budgetAllocated ?? 0)
+            (entry) => (entry.budgetSpent ?? 0) > (entry.budgetAllocated ?? 0)
           )
         )
       )
@@ -212,20 +213,20 @@ export async function PUT(
         schoolYear,
         ...(canSetDraft && { status: "DRAFT" }),
         objectives: {
-          create: objectives?.map((obj: any, objIndex: number) => ({
+          create: objectives?.map((obj: ObjectiveInput, objIndex: number) => ({
             title: obj.title,
             orderIndex: objIndex,
             kpis: {
-              create: obj.kpis?.map((kpi: any, kpiIndex: number) => ({
+              create: obj.kpis?.map((kpi, kpiIndex: number) => ({
                 description: kpi.description,
                 orderIndex: kpiIndex,
                 strategies: {
-                  create: kpi.strategies?.map((strategy: any, stratIndex: number) => ({
+                  create: kpi.strategies?.map((strategy, stratIndex: number) => ({
                     description: strategy.description,
                     target: strategy.target,
                     orderIndex: stratIndex,
                     timeEntries: {
-                      create: strategy.timeEntries?.map((entry: any) => ({
+                      create: strategy.timeEntries?.map((entry) => ({
                         period: entry.period,
                         periodStartMonth: entry.periodStartMonth,
                         periodEndMonth: entry.periodEndMonth,

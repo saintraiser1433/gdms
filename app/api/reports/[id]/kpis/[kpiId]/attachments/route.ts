@@ -91,7 +91,6 @@ export async function POST(
         )
       }
 
-      const ext = path.extname(file.name) || ".bin"
       const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_")
       const uniqueName = `${randomBytes(8).toString("hex")}_${safeName}`
       const filePath = path.join(uploadDir, uniqueName)

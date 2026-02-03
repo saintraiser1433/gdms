@@ -7,7 +7,7 @@ export default function LoginPage() {
       <div className="fixed right-4 top-4">
         <ThemeToggle />
       </div>
-      <div className="w-full max-w-sm md:max-w-md">
+      <div className="w-full max-w-[330px]">
         <LoginForm />
       </div>
     </div>

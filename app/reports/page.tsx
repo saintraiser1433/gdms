@@ -70,7 +70,7 @@ export default function ReportsPage() {
         const data = await response.json()
         setReports(data)
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch reports")
     } finally {
       setIsLoading(false)
@@ -203,7 +203,7 @@ export default function ReportsPage() {
       <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-          <Card className="pb-2">
+          <Card className="py-2">
             <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
               <div>
                 <CardTitle className="text-2xl">Reports</CardTitle>
@@ -218,7 +218,7 @@ export default function ReportsPage() {
                 </Button>
               )}
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-2 pb-2">
               {isLoading ? (
                 <div className="text-muted-foreground py-8">Loading...</div>
               ) : isProgramHead ? (

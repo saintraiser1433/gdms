@@ -1,8 +1,11 @@
 "use client"
 
+import Image from "next/image"
 import { useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { RiFileTextLine, RiEyeLine, RiSearchLine } from "@remixicon/react"
+import { RiEyeLine, RiSearchLine } from "@remixicon/react"
+
+import schoolLogoImg from "@/app/login/assets/school-logo.png"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -59,6 +62,12 @@ export function ReportCatalogGrid({ reports, isLoading }: ReportCatalogGridProps
     if (yearFilter && yearFilter !== "all") {
       result = result.filter((r) => r.schoolYear === yearFilter)
     }
+    // Sort by academic year descending, then project name ascending
+    result.sort((a, b) => {
+      const yearCompare = b.schoolYear.localeCompare(a.schoolYear)
+      if (yearCompare !== 0) return yearCompare
+      return a.programName.localeCompare(b.programName, undefined, { sensitivity: "base" })
+    })
     return result
   }, [reports, search, courseFilter, yearFilter])
 
@@ -80,7 +89,15 @@ export function ReportCatalogGrid({ reports, isLoading }: ReportCatalogGridProps
   if (reports.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
-        <RiFileTextLine className="h-16 w-16 text-muted-foreground/50 mb-4" />
+        <div className="mb-4 h-16 w-16 relative">
+          <Image
+            src={schoolLogoImg}
+            alt="Glan Institute of Technology"
+            width={64}
+            height={64}
+            className="object-contain opacity-50"
+          />
+        </div>
         <p className="text-muted-foreground font-medium">No approved reports in catalog</p>
         <p className="text-sm text-muted-foreground mt-1">Approved reports will appear here</p>
       </div>
@@ -128,20 +145,28 @@ export function ReportCatalogGrid({ reports, isLoading }: ReportCatalogGridProps
       </div>
 
       {filteredReports.length === 0 ? (
-        <div className="text-muted-foreground py-12 text-center">
-          No reports match your filters
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <RiSearchLine className="text-muted-foreground/50 mb-4 h-16 w-16" />
+          <p className="text-muted-foreground font-medium">No reports match your filters</p>
+          <p className="text-muted-foreground mt-1 text-sm">Try adjusting your search or filter criteria</p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredReports.map((report) => (
             <Card
               key={report.id}
-              className="group overflow-hidden transition-shadow hover:shadow-md"
+              className="group overflow-hidden shadow-md transition-shadow hover:shadow-lg"
             >
               <CardContent className="p-4 flex flex-col h-full">
                 <div className="flex items-start gap-3 mb-3">
-                  <div className="shrink-0 w-12 h-12 rounded-lg bg-linear-to-br from-red-800 to-rose-900 flex items-center justify-center">
-                    <RiFileTextLine className="h-6 w-6 text-white" />
+                  <div className="shrink-0 relative w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-rose-100 to-red-100 dark:from-rose-900/30 dark:to-red-900/30 flex items-center justify-center p-1">
+                    <Image
+                      src={schoolLogoImg}
+                      alt="Glan Institute of Technology"
+                      width={48}
+                      height={48}
+                      className="object-contain"
+                    />
                   </div>
                   <div className="min-w-0 flex-1">
                     <h3 className="font-medium line-clamp-2">{report.programName}</h3>
@@ -152,18 +177,18 @@ export function ReportCatalogGrid({ reports, isLoading }: ReportCatalogGridProps
                 </div>
                 <div className="mt-auto pt-3 border-t space-y-1.5">
                   {report.implementationPeriod && (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       <span className="font-medium text-foreground">Implementation Period:</span>{" "}
                       {report.implementationPeriod}
                     </p>
                   )}
                   {report.location && (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       <span className="font-medium text-foreground">Location:</span>{" "}
                       {report.location}
                     </p>
                   )}
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     <span className="font-medium text-foreground">Program Head:</span>{" "}
                     {report.createdBy?.name ?? "—"}
                   </p>

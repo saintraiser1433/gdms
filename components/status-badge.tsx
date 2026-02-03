@@ -1,6 +1,6 @@
 "use client"
 
-import { IconCircleCheckFilled, IconCircleX, IconEdit, IconLoader2, IconSend } from "@tabler/icons-react"
+import { IconCircleCheckFilled, IconCircleDashed, IconCircleX, IconEdit, IconLoader2, IconSend } from "@tabler/icons-react"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
@@ -28,6 +28,8 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
     normalizedStatus.includes("in process") ||
     normalizedStatus.includes("in progress") ||
     normalizedStatus.includes("progress")
+  const isNotStarted =
+    normalizedStatus.includes("not started") || normalizedStatus === "ns"
 
   return (
     <Badge
@@ -42,6 +44,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
         isNotCompleted && "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300",
         isCancelled && "border-red-200/70 bg-red-50/60 text-red-700/90 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300/90",
         isInProgress && "border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-300",
+        isNotStarted && "border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300",
         className
       )}
     >
@@ -59,6 +62,8 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
         <IconLoader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-blue-600 dark:text-blue-400" />
       ) : isCancelled ? (
         <IconCircleX className="h-3.5 w-3.5 shrink-0 text-red-600/90 dark:text-red-400/90" />
+      ) : isNotStarted ? (
+        <IconCircleDashed className="h-3.5 w-3.5 shrink-0 text-slate-600 dark:text-slate-400" />
       ) : null}
       {status || "—"}
     </Badge>

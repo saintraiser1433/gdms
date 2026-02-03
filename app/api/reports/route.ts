@@ -1,5 +1,7 @@
+import { Prisma } from "@prisma/client"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
+import type { ObjectiveInput } from "@/lib/report-types"
 import { NextResponse } from "next/server"
 
 export async function GET(request: Request) {
@@ -14,7 +16,7 @@ export async function GET(request: Request) {
     const course = searchParams.get("course")
     const schoolYear = searchParams.get("schoolYear")
 
-    const where: any = {}
+    const where: Prisma.ReportWhereInput = {}
 
     // Program heads can only see their own reports
     if (session.user.role === "PROGRAM_HEAD") {
@@ -26,7 +28,7 @@ export async function GET(request: Request) {
       if (session.user.role === "ADMIN" && status === "DRAFT") {
         where.id = "00000000-0000-0000-0000-000000000000" // Return empty for admin
       } else {
-        where.status = status
+        where.status = status as "DRAFT" | "SUBMITTED" | "APPROVED" | "DISAPPROVED"
       }
     } else if (session.user.role === "ADMIN") {
       where.status = { not: "DRAFT" }
@@ -87,11 +89,11 @@ export async function POST(request: Request) {
     } = body
 
     // Validate: budget spent must not exceed budget allocated
-    const hasBudgetViolation = (objectives ?? []).some((obj: any) =>
-      (obj.kpis ?? []).some((kpi: any) =>
-        (kpi.strategies ?? []).some((strat: any) =>
+    const hasBudgetViolation = (objectives ?? []).some((obj: ObjectiveInput) =>
+      (obj.kpis ?? []).some((kpi) =>
+        (kpi.strategies ?? []).some((strat) =>
           (strat.timeEntries ?? []).some(
-            (entry: any) => (entry.budgetSpent ?? 0) > (entry.budgetAllocated ?? 0)
+            (entry) => (entry.budgetSpent ?? 0) > (entry.budgetAllocated ?? 0)
           )
         )
       )
@@ -115,20 +117,20 @@ export async function POST(request: Request) {
         status: "DRAFT",
         createdBy: { connect: { id: session.user.id } },
         objectives: {
-          create: objectives?.map((obj: any, objIndex: number) => ({
+          create: objectives?.map((obj: ObjectiveInput, objIndex: number) => ({
             title: obj.title,
             orderIndex: objIndex,
             kpis: {
-              create: obj.kpis?.map((kpi: any, kpiIndex: number) => ({
+              create: obj.kpis?.map((kpi, kpiIndex: number) => ({
                 description: kpi.description,
                 orderIndex: kpiIndex,
                 strategies: {
-                  create: kpi.strategies?.map((strategy: any, stratIndex: number) => ({
+                  create: kpi.strategies?.map((strategy, stratIndex: number) => ({
                     description: strategy.description,
                     target: strategy.target,
                     orderIndex: stratIndex,
                     timeEntries: {
-                      create: strategy.timeEntries?.map((entry: any) => ({
+                      create: strategy.timeEntries?.map((entry) => ({
                         period: entry.period,
                         periodStartMonth: entry.periodStartMonth,
                         periodEndMonth: entry.periodEndMonth,

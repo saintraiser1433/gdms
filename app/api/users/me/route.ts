@@ -17,7 +17,7 @@ export async function GET() {
         email: true,
         role: true,
         courseId: true,
-        course: { select: { id: true, name: true } },
+        course: { select: { id: true, name: true, abbreviation: true } },
       },
     })
 

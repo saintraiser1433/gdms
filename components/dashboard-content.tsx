@@ -54,10 +54,10 @@ export function DashboardContent() {
           const reports = await res.json()
           setStats({
             total: reports.length,
-            draft: reports.filter((r: any) => r.status === "DRAFT").length,
-            submitted: reports.filter((r: any) => r.status === "SUBMITTED").length,
-            approved: reports.filter((r: any) => r.status === "APPROVED").length,
-            disapproved: reports.filter((r: any) => r.status === "DISAPPROVED").length,
+            draft: reports.filter((r: { status: string }) => r.status === "DRAFT").length,
+            submitted: reports.filter((r: { status: string }) => r.status === "SUBMITTED").length,
+            approved: reports.filter((r: { status: string }) => r.status === "APPROVED").length,
+            disapproved: reports.filter((r: { status: string }) => r.status === "DISAPPROVED").length,
           })
         }
       } catch {

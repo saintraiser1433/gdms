@@ -9,12 +9,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   Field,
-  FieldDescription,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { IconEye, IconEyeOff, IconLock, IconMail } from "@tabler/icons-react"
+import { IconEye, IconEyeOff, IconHeart, IconLock, IconMail } from "@tabler/icons-react"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -53,7 +52,7 @@ export function LoginForm({
       toast.success("Login successful!")
       router.push("/dashboard")
       router.refresh()
-    } catch (error) {
+    } catch {
       toast.error("An error occurred during login")
       setIsLoading(false)
     }
@@ -84,9 +83,9 @@ export function LoginForm({
           <form onSubmit={onSubmit}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">Welcome back</h1>
+                <h1 className="text-2xl font-bold">Login your session</h1>
                 <p className="text-muted-foreground text-balance">
-                  Login to GDMS - GIT Database Management System
+                  Sign in to access the Community Engagement Services reporting system
                 </p>
               </div>
               <Field>
@@ -137,7 +136,10 @@ export function LoginForm({
                   {isLoading ? "Logging in..." : "Login"}
                 </Button>
               </Field>
-             
+              <p className="text-muted-foreground flex items-center justify-center gap-1.5 pt-2 text-xs">
+                Credits to @Glan Institute of Technology
+                <IconHeart className="size-3.5 fill-current text-red-500" />
+              </p>
             </FieldGroup>
           </form>
         </CardContent>

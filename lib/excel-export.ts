@@ -2,20 +2,20 @@ import ExcelJS from "exceljs"
 
 interface TimeEntry {
   period: string
-  periodStartMonth: string
-  periodEndMonth: string
-  activities: string
-  status: string
-  statusComment: string | null
-  budgetAllocated: number
-  budgetSource: string
-  budgetSpent: number
-  variance: number
+  periodStartMonth?: string
+  periodEndMonth?: string
+  activities?: string
+  status?: string
+  statusComment?: string | null
+  budgetAllocated?: number
+  budgetSource?: string
+  budgetSpent?: number
+  variance?: number
 }
 
 interface Strategy {
   description: string
-  target: string
+  target?: string
   timeEntries: TimeEntry[]
 }
 
@@ -106,11 +106,11 @@ export async function exportReportToExcel(report: Report): Promise<void> {
   currentRow += 2
 
   // Process each objective
-  report.objectives.forEach((objective, objIndex) => {
+  report.objectives.forEach((objective) => {
     // OBJECTIVE row
     worksheet.mergeCells(currentRow, 1, currentRow, 18)
     const objCell = worksheet.getCell(currentRow, 1)
-    objCell.value = `OBJECTIVE/S: ${objIndex + 1}. ${objective.title}`
+    objCell.value = objective.title
     objCell.style = {
       font: { bold: true },
       fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFF0F0F0" } },
@@ -123,26 +123,27 @@ export async function exportReportToExcel(report: Report): Promise<void> {
     // Table header row 1 - Period headers
     const headerRow1 = currentRow
     const periodLabels = ["T 1 (January - April)", "T 2 (May - August)", "T 3 (September-December)"]
-    const lightBlueFill = { type: "pattern" as const, pattern: "solid" as const, fgColor: { argb: "FFADD8E6" } }
+    const firstRowHeaderFill = { type: "pattern" as const, pattern: "solid" as const, fgColor: { argb: "FFADD8E6" } }
+    const headerFill = { type: "pattern" as const, pattern: "solid" as const, fgColor: { argb: "FFF0F0F0" } }
 
     worksheet.getCell(headerRow1, 1).value = "KPI"
     worksheet.getCell(headerRow1, 1).style = {
       font: { bold: true },
-      fill: lightBlueFill,
+      fill: firstRowHeaderFill,
       border: thinBorder,
       alignment: { vertical: "middle" as const, wrapText: true },
     }
     worksheet.getCell(headerRow1, 2).value = "Strategies"
     worksheet.getCell(headerRow1, 2).style = {
       font: { bold: true },
-      fill: lightBlueFill,
+      fill: firstRowHeaderFill,
       border: thinBorder,
       alignment: { vertical: "middle" as const, wrapText: true },
     }
     worksheet.getCell(headerRow1, 3).value = "Target"
     worksheet.getCell(headerRow1, 3).style = {
       font: { bold: true },
-      fill: lightBlueFill,
+      fill: firstRowHeaderFill,
       border: thinBorder,
       alignment: { vertical: "middle" as const, wrapText: true },
     }
@@ -152,7 +153,7 @@ export async function exportReportToExcel(report: Report): Promise<void> {
       cell.value = periodLabels[p]
       cell.style = {
         font: { bold: true },
-        fill: lightBlueFill,
+        fill: firstRowHeaderFill,
         border: thinBorder,
         alignment: { horizontal: "center" as const, vertical: "middle" as const },
       }
@@ -170,18 +171,18 @@ export async function exportReportToExcel(report: Report): Promise<void> {
         cell.value = subHeaders[h]
         cell.style = {
           font: { bold: true },
-          fill: lightBlueFill,
+          fill: headerFill,
           border: thinBorder,
           alignment: { horizontal: "center" as const, vertical: "middle" as const, wrapText: true },
         }
       }
     }
     worksheet.getCell(headerRow2, 1).value = ""
-    worksheet.getCell(headerRow2, 1).style = { font: { bold: true }, fill: lightBlueFill, border: thinBorder }
+    worksheet.getCell(headerRow2, 1).style = { font: { bold: true }, fill: headerFill, border: thinBorder }
     worksheet.getCell(headerRow2, 2).value = ""
-    worksheet.getCell(headerRow2, 2).style = { font: { bold: true }, fill: lightBlueFill, border: thinBorder }
+    worksheet.getCell(headerRow2, 2).style = { font: { bold: true }, fill: headerFill, border: thinBorder }
     worksheet.getCell(headerRow2, 3).value = ""
-    worksheet.getCell(headerRow2, 3).style = { font: { bold: true }, fill: lightBlueFill, border: thinBorder }
+    worksheet.getCell(headerRow2, 3).style = { font: { bold: true }, fill: headerFill, border: thinBorder }
     worksheet.getRow(headerRow2).height = 24
     currentRow++
 
@@ -192,17 +193,17 @@ export async function exportReportToExcel(report: Report): Promise<void> {
     }
 
     // Data rows
-    objective.kpis.forEach((kpi, kpiIndex) => {
+    objective.kpis.forEach((kpi) => {
       const kpiStartRow = currentRow
       kpi.strategies.forEach((strategy, stratIndex) => {
         const row = currentRow
 
         // KPI
-        worksheet.getCell(row, 1).value = stratIndex === 0 ? `KPI ${kpiIndex + 1}. ${kpi.description}` : ""
+        worksheet.getCell(row, 1).value = stratIndex === 0 ? kpi.description : ""
         worksheet.getCell(row, 1).style = { border: thinBorder, alignment: { vertical: "top" as const, wrapText: true } }
 
         // Strategies
-        worksheet.getCell(row, 2).value = `S${stratIndex + 1}. ${strategy.description}`
+        worksheet.getCell(row, 2).value = strategy.description
         worksheet.getCell(row, 2).style = { border: thinBorder, alignment: { vertical: "top" as const, wrapText: true } }
 
         // Target
@@ -221,7 +222,10 @@ export async function exportReportToExcel(report: Report): Promise<void> {
             worksheet.getCell(row, startCol).style = { border: thinBorder, alignment: { vertical: "top" as const, wrapText: true } }
 
             const statusCell = worksheet.getCell(row, startCol + 1)
-            statusCell.value = entry.status ?? ""
+            const statusText = entry.statusComment?.trim()
+              ? `${entry.status ?? ""} (${entry.statusComment.trim()})`
+              : (entry.status ?? "")
+            statusCell.value = statusText
             const statusColor = getStatusColor(entry.status ?? "")
             statusCell.style = {
               border: thinBorder,

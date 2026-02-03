@@ -1,10 +1,5 @@
-import { redirect } from "next/navigation"
-import { auth } from "@/lib/auth"
+import { ComponentExample } from "@/components/component-example";
 
-export default async function Page() {
-  const session = await auth()
-  if (session?.user) {
-    redirect("/dashboard")
-  }
-  redirect("/login")
+export default function Page() {
+return <ComponentExample />;
 }

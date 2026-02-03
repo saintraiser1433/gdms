@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     startDate.setDate(startDate.getDate() - daysBack)
     startDate.setHours(0, 0, 0, 0)
 
-    const where: { createdById?: string; OR?: unknown[] } = {}
+    const where: { createdById?: string } = {}
 
     if (session.user.role === "PROGRAM_HEAD") {
       where.createdById = session.user.id

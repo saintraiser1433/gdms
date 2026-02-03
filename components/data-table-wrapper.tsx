@@ -341,15 +341,15 @@ export function DataTableWrapper<T>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex flex-col gap-4 border-t px-4 py-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-muted-foreground text-sm">
+      <div className="flex flex-col gap-2 border-t px-4 py-1.5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-muted-foreground text-xs">
           {selectable
             ? `${selectedIds.size} of ${filteredAndSortedData.length} row(s) selected.`
             : `${filteredAndSortedData.length} row(s)`}
         </div>
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
-              <Label htmlFor={rowsPerPageId} className="text-sm font-medium whitespace-nowrap">
+              <Label htmlFor={rowsPerPageId} className="text-xs font-medium whitespace-nowrap">
                 Rows per page
               </Label>
               <Select
@@ -358,7 +358,7 @@ export function DataTableWrapper<T>({
                   setPagination((p) => ({ ...p, pageSize: Number(value), pageIndex: 0 }))
                 }
               >
-                <SelectTrigger id={rowsPerPageId} size="sm" className="h-8 w-20">
+                <SelectTrigger id={rowsPerPageId} size="sm" className="h-8 w-20 text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent side="top">
@@ -370,7 +370,7 @@ export function DataTableWrapper<T>({
                 </SelectContent>
               </Select>
             </div>
-            <div className="text-sm font-medium whitespace-nowrap">
+            <div className="text-xs font-medium whitespace-nowrap">
               Page {pagination.pageIndex + 1} of {pageCount}
             </div>
             <div className="flex items-center gap-1">
