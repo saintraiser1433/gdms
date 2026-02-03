@@ -7,8 +7,9 @@ TOKEN="399EmyoLakejo1jlGTYKvFGkpcE_39S8euHhJXzZFv5KJNfMj"
 # Ensure we're in project root
 cd "$(dirname "$0")/.." || exit 1
 
-# Start Node server in background
-echo "Starting server on port $PORT..."
+# Start Node server in background (use ngrok URL for auth callbacks)
+export NEXTAUTH_URL="https://${NGROK_URL}"
+echo "Starting server on port $PORT (NEXTAUTH_URL=$NEXTAUTH_URL)..."
 cd .next/standalone || exit 1
 node server.js &
 NODE_PID=$!

@@ -7,22 +7,27 @@ export const authConfig = {
     signIn: "/login",
   },
   callbacks: {
-    authorized({ auth, request: { nextUrl } }) {
+    authorized({ auth, request }) {
+      const { nextUrl } = request
+      const forwardedHost = request.headers.get("x-forwarded-host")
+      const forwardedProto = request.headers.get("x-forwarded-proto") ?? "https"
+      const baseUrl = forwardedHost ? `${forwardedProto}://${forwardedHost}` : nextUrl.origin
+
       const isLoggedIn = !!auth?.user
       const isLoginPage = nextUrl.pathname === "/login"
       const isAuthApi = nextUrl.pathname.startsWith("/api/auth")
       const isRoot = nextUrl.pathname === "/"
 
       if (isAuthApi) return true
-      if (isRoot) return isLoggedIn ? Response.redirect(new URL("/dashboard", nextUrl)) : Response.redirect(new URL("/login", nextUrl))
-      if (isLoginPage) return isLoggedIn ? Response.redirect(new URL("/dashboard", nextUrl)) : true
+      if (isRoot) return isLoggedIn ? Response.redirect(new URL("/dashboard", baseUrl)) : Response.redirect(new URL("/login", baseUrl))
+      if (isLoginPage) return isLoggedIn ? Response.redirect(new URL("/dashboard", baseUrl)) : true
       if (!isLoggedIn) return false
 
       // Role-based redirect for admin routes
       if (nextUrl.pathname.startsWith("/admin")) {
         const role = (auth.user as { role?: string })?.role
         if (role !== "ADMIN") {
-          return Response.redirect(new URL("/dashboard", nextUrl))
+          return Response.redirect(new URL("/dashboard", baseUrl))
         }
       }
 
