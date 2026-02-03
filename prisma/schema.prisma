@@ -21,11 +21,27 @@ model User {
   createdAt    DateTime   @default(now()) @map("created_at")
 
   // Relations
-  createdReports  Report[]  @relation("ReportCreator")
-  reviewedReports Report[]  @relation("ReportReviewer")
-  comments        Comment[]
+  createdReports    Report[]        @relation("ReportCreator")
+  reviewedReports   Report[]        @relation("ReportReviewer")
+  comments          Comment[]
+  notifications     Notification[]  @relation("NotificationRecipient")
 
   @@map("users")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  reportId  String?  @map("report_id")
+  read      Boolean  @default(false)
+  userId    String   @map("user_id")
+  user      User     @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([reportId])
+  @@map("notifications")
 }
 
 model Report {
@@ -142,9 +158,10 @@ model Comment {
 }
 
 model Course {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  createdAt DateTime @default(now()) @map("created_at")
+  id           String   @id @default(cuid())
+  name         String   @unique
+  abbreviation String   @default("") @map("abbreviation")
+  createdAt    DateTime @default(now()) @map("created_at")
 
   users User[]
 

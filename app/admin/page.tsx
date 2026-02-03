@@ -12,6 +12,15 @@ import { RiEyeLine, RiCheckLine, RiCloseLine } from "@remixicon/react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DataTableWrapper } from "@/components/data-table-wrapper"
 import { StatusBadge } from "@/components/status-badge"
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface Report {
   id: string
@@ -34,8 +43,8 @@ function ReportTable({
   isLoading,
 }: {
   reports: Report[]
-  onApprove: (id: string) => void
-  onDisapprove: (id: string) => void
+  onApprove: (report: Report) => void
+  onDisapprove: (report: Report) => void
   isLoading: boolean
 }) {
   const router = useRouter()
@@ -119,7 +128,7 @@ function ReportTable({
                 size="sm"
                 variant="ghost"
                 className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-950"
-                onClick={() => onApprove(row.id)}
+                onClick={() => onApprove(row)}
               >
                 <RiCheckLine className="h-4 w-4" />
                 <span className="sr-only">Approve</span>
@@ -128,7 +137,7 @@ function ReportTable({
                 size="sm"
                 variant="ghost"
                 className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
-                onClick={() => onDisapprove(row.id)}
+                onClick={() => onDisapprove(row)}
               >
                 <RiCloseLine className="h-4 w-4" />
                 <span className="sr-only">Disapprove</span>
@@ -166,6 +175,24 @@ function ReportTable({
           ],
           getValue: (row) => row.status,
         },
+        {
+          columnId: "course",
+          label: "Course",
+          options: [...new Set(reports.map((r) => r.course))]
+            .filter(Boolean)
+            .sort()
+            .map((c) => ({ value: c, label: c })),
+          getValue: (row) => row.course,
+        },
+        {
+          columnId: "schoolYear",
+          label: "School Year",
+          options: [...new Set(reports.map((r) => r.schoolYear))]
+            .filter(Boolean)
+            .sort()
+            .map((y) => ({ value: y, label: y })),
+          getValue: (row) => row.schoolYear,
+        },
       ]}
     />
   )
@@ -175,6 +202,11 @@ export default function AdminPage() {
   const router = useRouter()
   const [reports, setReports] = useState<Report[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false)
+  const [disapproveDialogOpen, setDisapproveDialogOpen] = useState(false)
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null)
+  const [isApproving, setIsApproving] = useState(false)
+  const [isDisapproving, setIsDisapproving] = useState(false)
 
   useEffect(() => {
     fetchReports()
@@ -194,41 +226,59 @@ export default function AdminPage() {
     }
   }
 
-  const handleApprove = async (id: string) => {
-    if (!confirm("Are you sure you want to approve this report?")) return
+  const openApproveDialog = (report: Report) => {
+    setSelectedReport(report)
+    setApproveDialogOpen(true)
+  }
 
+  const openDisapproveDialog = (report: Report) => {
+    setSelectedReport(report)
+    setDisapproveDialogOpen(true)
+  }
+
+  const handleApproveConfirm = async () => {
+    if (!selectedReport) return
+    setIsApproving(true)
     try {
-      const response = await fetch(`/api/reports/${id}/approve`, {
+      const response = await fetch(`/api/reports/${selectedReport.id}/approve`, {
         method: "POST",
       })
 
       if (response.ok) {
         toast.success("Report approved successfully")
+        setApproveDialogOpen(false)
+        setSelectedReport(null)
         fetchReports()
       } else {
         toast.error("Failed to approve report")
       }
     } catch (error) {
       toast.error("Failed to approve report")
+    } finally {
+      setIsApproving(false)
     }
   }
 
-  const handleDisapprove = async (id: string) => {
-    if (!confirm("Are you sure you want to disapprove this report?")) return
-
+  const handleDisapproveConfirm = async () => {
+    if (!selectedReport) return
+    setIsDisapproving(true)
     try {
-      const response = await fetch(`/api/reports/${id}/disapprove`, {
+      const response = await fetch(`/api/reports/${selectedReport.id}/disapprove`, {
         method: "POST",
       })
 
       if (response.ok) {
         toast.success("Report disapproved")
+        setDisapproveDialogOpen(false)
+        setSelectedReport(null)
         fetchReports()
       } else {
         toast.error("Failed to disapprove report")
       }
     } catch (error) {
       toast.error("Failed to disapprove report")
+    } finally {
+      setIsDisapproving(false)
     }
   }
 
@@ -302,32 +352,32 @@ export default function AdminPage() {
                 <TabsContent value="submitted" className="mt-4">
                   <ReportTable
                     reports={submittedReports}
-                    onApprove={handleApprove}
-                    onDisapprove={handleDisapprove}
+                    onApprove={openApproveDialog}
+                    onDisapprove={openDisapproveDialog}
                     isLoading={isLoading}
                   />
                 </TabsContent>
                 <TabsContent value="approved" className="mt-4">
                   <ReportTable
                     reports={approvedReports}
-                    onApprove={handleApprove}
-                    onDisapprove={handleDisapprove}
+                    onApprove={openApproveDialog}
+                    onDisapprove={openDisapproveDialog}
                     isLoading={isLoading}
                   />
                 </TabsContent>
                 <TabsContent value="disapproved" className="mt-4">
                   <ReportTable
                     reports={disapprovedReports}
-                    onApprove={handleApprove}
-                    onDisapprove={handleDisapprove}
+                    onApprove={openApproveDialog}
+                    onDisapprove={openDisapproveDialog}
                     isLoading={isLoading}
                   />
                 </TabsContent>
                 <TabsContent value="all" className="mt-4">
                   <ReportTable
                     reports={reports}
-                    onApprove={handleApprove}
-                    onDisapprove={handleDisapprove}
+                    onApprove={openApproveDialog}
+                    onDisapprove={openDisapproveDialog}
                     isLoading={isLoading}
                   />
                 </TabsContent>
@@ -336,6 +386,52 @@ export default function AdminPage() {
           </Card>
         </div>
       </SidebarInset>
+
+      <AlertDialog open={approveDialogOpen} onOpenChange={setApproveDialogOpen}>
+        <AlertDialogContent className="max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Approve report?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {selectedReport
+                ? `Are you sure you want to approve "${selectedReport.programName}"? This will mark the report as approved and lock it from further edits.`
+                : "Are you sure you want to approve this report?"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isApproving}>Cancel</AlertDialogCancel>
+            <Button
+              onClick={handleApproveConfirm}
+              disabled={isApproving}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              {isApproving ? "Approving..." : "Approve"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={disapproveDialogOpen} onOpenChange={setDisapproveDialogOpen}>
+        <AlertDialogContent className="max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disapprove report?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {selectedReport
+                ? `Are you sure you want to disapprove "${selectedReport.programName}"? The program head will need to make changes and resubmit.`
+                : "Are you sure you want to disapprove this report?"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDisapproving}>Cancel</AlertDialogCancel>
+            <Button
+              variant="destructive"
+              onClick={handleDisapproveConfirm}
+              disabled={isDisapproving}
+            >
+              {isDisapproving ? "Disapproving..." : "Disapprove"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SidebarProvider>
   )
 }

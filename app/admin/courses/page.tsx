@@ -13,11 +13,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
-import { RiAddLine, RiDeleteBinLine } from "@remixicon/react"
+import { RiAddLine, RiDeleteBinLine, RiEditLine } from "@remixicon/react"
 
 interface Course {
   id: string
   name: string
+  abbreviation: string
   createdAt: string
 }
 
@@ -26,10 +27,16 @@ export default function CoursesPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [newCourseName, setNewCourseName] = useState("")
+  const [newCourseAbbreviation, setNewCourseAbbreviation] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [courseToDelete, setCourseToDelete] = useState<{ id: string; name: string } | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null)
+  const [editName, setEditName] = useState("")
+  const [editAbbreviation, setEditAbbreviation] = useState("")
+  const [isUpdating, setIsUpdating] = useState(false)
 
   useEffect(() => {
     fetchCourses()
@@ -57,12 +64,16 @@ export default function CoursesPage() {
       const response = await fetch("/api/courses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newCourseName.trim() }),
+        body: JSON.stringify({
+          name: newCourseName.trim(),
+          abbreviation: newCourseAbbreviation.trim(),
+        }),
       })
       const data = await response.json()
       if (response.ok) {
         toast.success("Course added successfully")
         setNewCourseName("")
+        setNewCourseAbbreviation("")
         setAddModalOpen(false)
         fetchCourses()
       } else {
@@ -72,6 +83,48 @@ export default function CoursesPage() {
       toast.error("Failed to add course")
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const openEditModal = (course: Course) => {
+    setEditingCourse(course)
+    setEditName(course.name)
+    setEditAbbreviation(course.abbreviation ?? "")
+    setEditModalOpen(true)
+  }
+
+  const closeEditModal = () => {
+    setEditModalOpen(false)
+    setEditingCourse(null)
+    setEditName("")
+    setEditAbbreviation("")
+  }
+
+  const handleEditCourse = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingCourse || !editName.trim()) return
+    setIsUpdating(true)
+    try {
+      const response = await fetch(`/api/courses/${editingCourse.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editName.trim(),
+          abbreviation: editAbbreviation.trim(),
+        }),
+      })
+      const data = await response.json()
+      if (response.ok) {
+        toast.success("Course updated successfully")
+        closeEditModal()
+        fetchCourses()
+      } else {
+        toast.error(data.error || "Failed to update course")
+      }
+    } catch {
+      toast.error("Failed to update course")
+    } finally {
+      setIsUpdating(false)
     }
   }
 
@@ -118,18 +171,38 @@ export default function CoursesPage() {
       cell: (row: Course) => <div className="font-medium">{row.name}</div>,
     },
     {
+      id: "abbreviation",
+      header: "Abbreviation",
+      sortable: true,
+      getSortValue: (row: Course) => row.abbreviation ?? "",
+      cell: (row: Course) => (
+        <span className="text-muted-foreground">{row.abbreviation || "-"}</span>
+      ),
+    },
+    {
       id: "actions",
       header: "",
       cell: (row: Course) => (
-        <Button
-          size="sm"
-          variant="destructive"
-          className="h-8"
-          onClick={() => openDeleteDialog(row.id, row.name)}
-        >
-          <RiDeleteBinLine className="h-4 w-4 mr-1" />
-          Delete
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8"
+            onClick={() => openEditModal(row)}
+            title="Edit"
+          >
+            <RiEditLine className="h-4 w-4" />
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={() => openDeleteDialog(row.id, row.name)}
+            title="Delete"
+          >
+            <RiDeleteBinLine className="h-4 w-4" />
+          </Button>
+        </div>
       ),
       headerClassName: "w-24",
     },
@@ -172,7 +245,7 @@ export default function CoursesPage() {
                     </Button>
                   }
                   searchPlaceholder="Search courses..."
-                  getSearchableText={(row) => row.name}
+                  getSearchableText={(row) => `${row.name} ${row.abbreviation ?? ""}`.trim()}
                 />
               )}
             </CardContent>
@@ -197,6 +270,16 @@ export default function CoursesPage() {
                 disabled={isSubmitting}
               />
             </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="course-abbreviation">Abbreviation</Label>
+              <Input
+                id="course-abbreviation"
+                value={newCourseAbbreviation}
+                onChange={(e) => setNewCourseAbbreviation(e.target.value)}
+                placeholder="e.g. BSN"
+                disabled={isSubmitting}
+              />
+            </div>
             <div className="flex justify-end gap-2">
               <Button
                 type="button"
@@ -208,6 +291,50 @@ export default function CoursesPage() {
               </Button>
               <Button type="submit" disabled={isSubmitting || !newCourseName.trim()}>
                 {isSubmitting ? "Adding..." : "Add Course"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={editModalOpen} onOpenChange={(open) => !open && closeEditModal()}>
+        <DialogContent title="Edit Course" className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Course</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleEditCourse} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="edit-course-name">Course Name</Label>
+              <Input
+                id="edit-course-name"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="e.g. Bachelor of Science in Nursing"
+                required
+                disabled={isUpdating}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="edit-course-abbreviation">Abbreviation</Label>
+              <Input
+                id="edit-course-abbreviation"
+                value={editAbbreviation}
+                onChange={(e) => setEditAbbreviation(e.target.value)}
+                placeholder="e.g. BSN"
+                disabled={isUpdating}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={closeEditModal}
+                disabled={isUpdating}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isUpdating || !editName.trim()}>
+                {isUpdating ? "Saving..." : "Save"}
               </Button>
             </div>
           </form>

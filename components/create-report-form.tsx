@@ -204,6 +204,7 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
         setLocation(mapped.location)
         setCourse(mapped.course)
         setSchoolYear(mapped.schoolYear)
+        setReportStatus(data.status ?? null)
         if (mapped.objectives.length > 0) {
           setObjectives(mapped.objectives)
         }
@@ -224,6 +225,8 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
         .catch(() => {})
     }
   }, [reportId])
+
+  const [reportStatus, setReportStatus] = useState<string | null>(null)
 
   const [objectives, setObjectives] = useState<Objective[]>([
     {
@@ -350,6 +353,22 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
         return
       }
 
+      // Validate: budget spent must not exceed budget allocated
+      const hasBudgetViolation = objectives.some((obj) =>
+        obj.kpis.some((kpi) =>
+          kpi.strategies.some((strat) =>
+            strat.timeEntries.some(
+              (entry) => (entry.budgetSpent ?? 0) > (entry.budgetAllocated ?? 0)
+            )
+          )
+        )
+      )
+      if (hasBudgetViolation) {
+        toast.error("Budget spent cannot be greater than budget allocated for any entry.")
+        setIsSubmitting(false)
+        return
+      }
+
       const normalizedObjectives = objectives.map((obj) => ({
         ...obj,
         kpis: obj.kpis.map((kpi) => ({
@@ -389,7 +408,9 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
 
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}))
-        throw new Error(errData.error ?? "Failed to save report")
+        toast.error(errData.error ?? "Failed to save report")
+        setIsSubmitting(false)
+        return
       }
 
       const report = await response.json()
@@ -407,11 +428,13 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
       toast.success(
         saveAsDraft
           ? isEdit ? "Report updated" : "Report saved as draft"
-          : "Report submitted successfully"
+          : reportStatus === "DISAPPROVED"
+            ? "Report resubmitted successfully"
+            : "Report submitted successfully"
       )
       onSuccess?.()
     } catch (error) {
-      toast.error("Failed to save report")
+      toast.error(error instanceof Error ? error.message : "Failed to save report")
       console.error(error)
     } finally {
       setIsSubmitting(false)
@@ -742,7 +765,15 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
                                   onChange={(e) =>
                                     updateTimeEntry(objIndex, kpiIndex, 0, entryIndex, "budgetSpent", parseFloat(e.target.value) || 0)
                                   }
+                                  className={
+                                    (entry.budgetSpent ?? 0) > (entry.budgetAllocated ?? 0)
+                                      ? "border-destructive focus-visible:ring-destructive"
+                                      : ""
+                                  }
                                 />
+                                {(entry.budgetSpent ?? 0) > (entry.budgetAllocated ?? 0) && (
+                                  <p className="text-sm text-destructive">Budget spent cannot exceed budget allocated</p>
+                                )}
                               </div>
                             </div>
                           </Card>
@@ -791,7 +822,11 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
           disabled={isSubmitting}
           className="bg-linear-to-r from-red-800 to-rose-900 text-white hover:opacity-90 dark:from-red-700 dark:to-rose-950 dark:text-white"
         >
-          {isSubmitting ? "Submitting..." : "Submit Report"}
+          {isSubmitting
+            ? "Submitting..."
+            : reportStatus === "DISAPPROVED"
+              ? "Resubmit Report"
+              : "Submit Report"}
         </Button>
       </div>
     </form>

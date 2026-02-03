@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
+import { Role, UserStatus } from "@prisma/client"
 import { NextResponse } from "next/server"
 
 export async function POST(
@@ -26,12 +27,14 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
     }
 
-    if (report.status !== "DRAFT") {
+    if (report.status === "APPROVED") {
       return NextResponse.json(
-        { error: "Can only submit draft reports" },
+        { error: "Approved reports cannot be re-submitted." },
         { status: 400 }
       )
     }
+
+    // Allow DRAFT, SUBMITTED (re-submit after edits), and DISAPPROVED (resubmit after changes)
 
     const updatedReport = await prisma.report.update({
       where: { id },
@@ -39,7 +42,32 @@ export async function POST(
         status: "SUBMITTED",
         submittedAt: new Date(),
       },
+      include: {
+        createdBy: { select: { name: true } },
+      },
     })
+
+    // Create notifications for all admin users (non-blocking - submit succeeds even if this fails)
+    try {
+      if (prisma.notification) {
+        const admins = await prisma.user.findMany({
+          where: { role: Role.ADMIN, status: UserStatus.ACTIVE },
+          select: { id: true },
+        })
+        const submitterName = updatedReport.createdBy?.name ?? "A program head"
+        const reportTitle = updatedReport.programName || "Untitled report"
+        await prisma.notification.createMany({
+          data: admins.map((admin) => ({
+            userId: admin.id,
+            reportId: id,
+            title: "New Report Submitted",
+            message: `${submitterName} submitted "${reportTitle}" for review.`,
+          })),
+        })
+      }
+    } catch (notifErr) {
+      console.warn("Could not create notifications (report submit succeeded):", notifErr)
+    }
 
     return NextResponse.json(updatedReport)
   } catch (error) {

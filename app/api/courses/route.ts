@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { name } = body
+    const { name, abbreviation } = body
 
     if (!name || typeof name !== "string") {
       return NextResponse.json(
@@ -57,6 +57,8 @@ export async function POST(request: Request) {
       )
     }
 
+    const trimmedAbbrev = typeof abbreviation === "string" ? abbreviation.trim() : ""
+
     const courseClient = getCoursesClient()
     const existing = await courseClient.findUnique({
       where: { name: trimmed },
@@ -68,9 +70,26 @@ export async function POST(request: Request) {
       )
     }
 
-    const course = await courseClient.create({
-      data: { name: trimmed },
-    })
+    let course
+    try {
+      course = await courseClient.create({
+        data: { name: trimmed, abbreviation: trimmedAbbrev },
+      })
+    } catch (createErr: unknown) {
+      const msg = createErr instanceof Error ? createErr.message : String(createErr)
+      if (msg.includes("Unknown argument") && msg.includes("abbreviation")) {
+        // Fallback for stale Prisma client: create without abbreviation, then update
+        course = await courseClient.create({ data: { name: trimmed } })
+        if (trimmedAbbrev) {
+          course = await courseClient.update({
+            where: { id: course.id },
+            data: { abbreviation: trimmedAbbrev },
+          })
+        }
+      } else {
+        throw createErr
+      }
+    }
 
     return NextResponse.json(course)
   } catch (error) {

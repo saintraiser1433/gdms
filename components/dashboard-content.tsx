@@ -82,118 +82,78 @@ export function DashboardContent() {
             </p>
           </div>
 
-          {/* Summary Count */}
-          <div>
-            <h2 className="mb-4 text-xl font-semibold">Summary</h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              <Card>
-                <CardContent className="flex items-center gap-4 pt-6">
-                  <div className="flex size-12 items-center justify-center rounded-xl bg-linear-to-br from-red-800 to-rose-900 text-white shadow-lg">
-                    <IconReport className="size-6" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold tabular-nums">{stats.total}</p>
-                    <p className="text-sm text-muted-foreground">Total</p>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="flex items-center gap-4 pt-6">
-                  <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg">
-                    <IconFileText className="size-6" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold tabular-nums">{stats.draft}</p>
-                    <p className="text-sm text-muted-foreground">Draft</p>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="flex items-center gap-4 pt-6">
-                  <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg">
-                    <IconClock className="size-6" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold tabular-nums">{stats.submitted}</p>
-                    <p className="text-sm text-muted-foreground">Pending</p>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="flex items-center gap-4 pt-6">
-                  <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-lg">
-                    <IconCheck className="size-6" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold tabular-nums">{stats.approved}</p>
-                    <p className="text-sm text-muted-foreground">Approved</p>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="flex items-center gap-4 pt-6">
-                  <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white shadow-lg">
-                    <IconX className="size-6" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold tabular-nums">{stats.disapproved}</p>
-                    <p className="text-sm text-muted-foreground">Disapproved</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
           {/* Analytics */}
           <div>
             <h2 className="mb-4 text-xl font-semibold">Analytics</h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardDescription>Total Reports</CardDescription>
-                  <IconReport className="size-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.total}</div>
-                  <p className="text-xs text-muted-foreground">
-                    All reports in the system
-                  </p>
+                <CardContent className="flex items-center gap-4 pt-6">
+                  <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-red-800 to-rose-900 text-white shadow-lg">
+                    <IconReport className="size-6" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-2xl font-bold tabular-nums">{stats.total}</p>
+                    <p className="text-sm font-medium">Total Reports</p>
+                    <p className="text-xs text-muted-foreground">
+                      All reports in the system
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardDescription>Draft</CardDescription>
-                  <IconClock className="size-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.draft}</div>
-                  <p className="text-xs text-muted-foreground">
-                    Reports in progress
-                  </p>
+                <CardContent className="flex items-center gap-4 pt-6">
+                  <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg">
+                    <IconFileText className="size-6" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-2xl font-bold tabular-nums">{stats.draft}</p>
+                    <p className="text-sm font-medium">Draft</p>
+                    <p className="text-xs text-muted-foreground">
+                      Reports in progress
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardDescription>Pending Review</CardDescription>
-                  <IconClock className="size-4 text-amber-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.submitted}</div>
-                  <p className="text-xs text-muted-foreground">
-                    Awaiting approval
-                  </p>
+                <CardContent className="flex items-center gap-4 pt-6">
+                  <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg">
+                    <IconClock className="size-6" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-2xl font-bold tabular-nums">{stats.submitted}</p>
+                    <p className="text-sm font-medium">Pending Review</p>
+                    <p className="text-xs text-muted-foreground">
+                      Awaiting approval
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardDescription>Approved</CardDescription>
-                  <IconCheck className="size-4 text-green-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.approved}</div>
-                  <p className="text-xs text-muted-foreground">
-                    Completed reports
-                  </p>
+                <CardContent className="flex items-center gap-4 pt-6">
+                  <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-lg">
+                    <IconCheck className="size-6" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-2xl font-bold tabular-nums">{stats.approved}</p>
+                    <p className="text-sm font-medium">Approved</p>
+                    <p className="text-xs text-muted-foreground">
+                      Completed reports
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="flex items-center gap-4 pt-6">
+                  <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white shadow-lg">
+                    <IconX className="size-6" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-2xl font-bold tabular-nums">{stats.disapproved}</p>
+                    <p className="text-sm font-medium">Disapproved</p>
+                    <p className="text-xs text-muted-foreground">
+                      Rejected reports
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             </div>

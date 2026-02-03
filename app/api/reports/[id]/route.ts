@@ -140,6 +140,23 @@ export async function PUT(
       objectives,
     } = body
 
+    // Validate: budget spent must not exceed budget allocated
+    const hasBudgetViolation = (objectives ?? []).some((obj: any) =>
+      (obj.kpis ?? []).some((kpi: any) =>
+        (kpi.strategies ?? []).some((strat: any) =>
+          (strat.timeEntries ?? []).some(
+            (entry: any) => (entry.budgetSpent ?? 0) > (entry.budgetAllocated ?? 0)
+          )
+        )
+      )
+    )
+    if (hasBudgetViolation) {
+      return NextResponse.json(
+        { error: "Budget spent cannot be greater than budget allocated for any entry." },
+        { status: 400 }
+      )
+    }
+
     // Delete existing nested data
     await prisma.objective.deleteMany({
       where: { reportId: id },

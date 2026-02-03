@@ -16,6 +16,11 @@ const pool = new pg.Pool({
 
 const adapter = new PrismaPg(pool)
 
+// Invalidate cached client if it lacks newer models (e.g. after schema migration)
+if (globalForPrisma.prisma && !(globalForPrisma.prisma as { notification?: unknown }).notification) {
+  globalForPrisma.prisma = undefined
+}
+
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter })
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma

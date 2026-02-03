@@ -79,6 +79,23 @@ export async function POST(request: Request) {
       objectives,
     } = body
 
+    // Validate: budget spent must not exceed budget allocated
+    const hasBudgetViolation = (objectives ?? []).some((obj: any) =>
+      (obj.kpis ?? []).some((kpi: any) =>
+        (kpi.strategies ?? []).some((strat: any) =>
+          (strat.timeEntries ?? []).some(
+            (entry: any) => (entry.budgetSpent ?? 0) > (entry.budgetAllocated ?? 0)
+          )
+        )
+      )
+    )
+    if (hasBudgetViolation) {
+      return NextResponse.json(
+        { error: "Budget spent cannot be greater than budget allocated for any entry." },
+        { status: 400 }
+      )
+    }
+
     // Create report with nested objectives, KPIs, strategies, and time entries
     const report = await prisma.report.create({
       data: {

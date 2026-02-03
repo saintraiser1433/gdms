@@ -38,6 +38,22 @@ export async function POST(
       },
     })
 
+    // Notify the program head (report creator)
+    try {
+      if (prisma.notification && report.createdById) {
+        await prisma.notification.create({
+          data: {
+            userId: report.createdById,
+            reportId: id,
+            title: "Report Approved",
+            message: `Your report "${report.programName || "Untitled report"}" has been approved.`,
+          },
+        })
+      }
+    } catch (notifErr) {
+      console.warn("Could not create notification (approve succeeded):", notifErr)
+    }
+
     return NextResponse.json(updatedReport)
   } catch (error) {
     console.error("Error approving report:", error)

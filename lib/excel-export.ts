@@ -75,29 +75,34 @@ export async function exportReportToExcel(report: Report): Promise<void> {
   // Header section - NO merges so values stay visible
   const headerStyle = { font: { bold: true }, border: thinBorder, alignment: { vertical: "middle" as const, wrapText: true } }
   const valueStyle = { border: thinBorder, alignment: { vertical: "middle" as const, wrapText: true } }
+  const defaultRowHeight = 22
 
   worksheet.getCell(currentRow, 1).value = "Program/Project Name:"
   worksheet.getCell(currentRow, 1).style = headerStyle
   worksheet.getCell(currentRow, 2).value = report.programName ?? ""
   worksheet.getCell(currentRow, 2).style = valueStyle
+  worksheet.getRow(currentRow).height = defaultRowHeight
   currentRow++
 
   worksheet.getCell(currentRow, 1).value = "Implementation Period:"
   worksheet.getCell(currentRow, 1).style = headerStyle
   worksheet.getCell(currentRow, 2).value = report.implementationPeriod ?? ""
   worksheet.getCell(currentRow, 2).style = valueStyle
+  worksheet.getRow(currentRow).height = defaultRowHeight
   currentRow++
 
   worksheet.getCell(currentRow, 1).value = "Person/Unit Responsible:"
   worksheet.getCell(currentRow, 1).style = headerStyle
   worksheet.getCell(currentRow, 2).value = report.responsiblePerson ?? ""
   worksheet.getCell(currentRow, 2).style = valueStyle
+  worksheet.getRow(currentRow).height = defaultRowHeight
   currentRow++
 
   worksheet.getCell(currentRow, 1).value = "Location:"
   worksheet.getCell(currentRow, 1).style = headerStyle
   worksheet.getCell(currentRow, 2).value = report.location ?? ""
   worksheet.getCell(currentRow, 2).style = valueStyle
+  worksheet.getRow(currentRow).height = defaultRowHeight
   currentRow += 2
 
   // Process each objective
@@ -112,25 +117,47 @@ export async function exportReportToExcel(report: Report): Promise<void> {
       border: thinBorder,
       alignment: { vertical: "middle" as const },
     }
+    worksheet.getRow(currentRow).height = 24
     currentRow += 2
 
     // Table header row 1 - Period headers
     const headerRow1 = currentRow
     const periodLabels = ["T 1 (January - April)", "T 2 (May - August)", "T 3 (September-December)"]
+    const lightBlueFill = { type: "pattern" as const, pattern: "solid" as const, fgColor: { argb: "FFADD8E6" } }
+
     worksheet.getCell(headerRow1, 1).value = "KPI"
+    worksheet.getCell(headerRow1, 1).style = {
+      font: { bold: true },
+      fill: lightBlueFill,
+      border: thinBorder,
+      alignment: { vertical: "middle" as const, wrapText: true },
+    }
     worksheet.getCell(headerRow1, 2).value = "Strategies"
+    worksheet.getCell(headerRow1, 2).style = {
+      font: { bold: true },
+      fill: lightBlueFill,
+      border: thinBorder,
+      alignment: { vertical: "middle" as const, wrapText: true },
+    }
     worksheet.getCell(headerRow1, 3).value = "Target"
+    worksheet.getCell(headerRow1, 3).style = {
+      font: { bold: true },
+      fill: lightBlueFill,
+      border: thinBorder,
+      alignment: { vertical: "middle" as const, wrapText: true },
+    }
     for (let p = 0; p < 3; p++) {
       worksheet.mergeCells(headerRow1, 4 + p * 5, headerRow1, 8 + p * 5)
       const cell = worksheet.getCell(headerRow1, 4 + p * 5)
       cell.value = periodLabels[p]
       cell.style = {
         font: { bold: true },
-        fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFD0D0D0" } },
+        fill: lightBlueFill,
         border: thinBorder,
         alignment: { horizontal: "center" as const, vertical: "middle" as const },
       }
     }
+    worksheet.getRow(headerRow1).height = 24
     currentRow++
 
     // Table header row 2 - Column headers
@@ -143,18 +170,19 @@ export async function exportReportToExcel(report: Report): Promise<void> {
         cell.value = subHeaders[h]
         cell.style = {
           font: { bold: true },
-          fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFD0D0D0" } },
+          fill: lightBlueFill,
           border: thinBorder,
           alignment: { horizontal: "center" as const, vertical: "middle" as const, wrapText: true },
         }
       }
     }
     worksheet.getCell(headerRow2, 1).value = ""
-    worksheet.getCell(headerRow2, 1).style = { font: { bold: true }, fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFD0D0D0" } }, border: thinBorder }
+    worksheet.getCell(headerRow2, 1).style = { font: { bold: true }, fill: lightBlueFill, border: thinBorder }
     worksheet.getCell(headerRow2, 2).value = ""
-    worksheet.getCell(headerRow2, 2).style = { font: { bold: true }, fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFD0D0D0" } }, border: thinBorder }
+    worksheet.getCell(headerRow2, 2).style = { font: { bold: true }, fill: lightBlueFill, border: thinBorder }
     worksheet.getCell(headerRow2, 3).value = ""
-    worksheet.getCell(headerRow2, 3).style = { font: { bold: true }, fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFD0D0D0" } }, border: thinBorder }
+    worksheet.getCell(headerRow2, 3).style = { font: { bold: true }, fill: lightBlueFill, border: thinBorder }
+    worksheet.getRow(headerRow2).height = 24
     currentRow++
 
     const totals = {
@@ -180,6 +208,8 @@ export async function exportReportToExcel(report: Report): Promise<void> {
         // Target
         worksheet.getCell(row, 3).value = strategy.target ?? ""
         worksheet.getCell(row, 3).style = { border: thinBorder, alignment: { vertical: "top" as const, wrapText: true } }
+
+        worksheet.getRow(row).height = 22
 
         const t1 = strategy.timeEntries.find((e) => e.period === "T1")
         const t2 = strategy.timeEntries.find((e) => e.period === "T2")
@@ -266,6 +296,7 @@ export async function exportReportToExcel(report: Report): Promise<void> {
     worksheet.getCell(totRow, 17).style = { font: { bold: true }, border: thinBorder, numFmt: "#,##0" }
     worksheet.getCell(totRow, 18).value = totals.t3.allocated - totals.t3.spent
     worksheet.getCell(totRow, 18).style = { border: thinBorder, numFmt: "#,##0" }
+    worksheet.getRow(totRow).height = defaultRowHeight
     currentRow += 2
   })
 

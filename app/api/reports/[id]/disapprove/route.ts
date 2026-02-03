@@ -38,6 +38,22 @@ export async function POST(
       },
     })
 
+    // Notify the program head (report creator)
+    try {
+      if (prisma.notification && report.createdById) {
+        await prisma.notification.create({
+          data: {
+            userId: report.createdById,
+            reportId: id,
+            title: "Report Disapproved",
+            message: `Your report "${report.programName || "Untitled report"}" has been disapproved. Please make changes and resubmit.`,
+          },
+        })
+      }
+    } catch (notifErr) {
+      console.warn("Could not create notification (disapprove succeeded):", notifErr)
+    }
+
     return NextResponse.json(updatedReport)
   } catch (error) {
     console.error("Error disapproving report:", error)
