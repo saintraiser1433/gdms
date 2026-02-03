@@ -319,21 +319,21 @@ export default function UsersPage() {
       <AppSidebar />
       <SidebarInset>
         <SiteHeader />
-        <div className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-          <div className="flex flex-row flex-wrap items-start justify-between gap-4">
+        <div className="flex flex-1 flex-col gap-4 p-3 sm:p-4 lg:gap-6 lg:p-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-4">
             <div>
-              <h1 className="text-2xl font-bold">User Management</h1>
-              <p className="text-muted-foreground text-sm mt-1">
+              <h1 className="text-xl font-bold sm:text-2xl">User Management</h1>
+              <p className="text-xs text-muted-foreground sm:text-sm mt-1">
                 Add and manage program heads who can create and submit reports
               </p>
             </div>
-            <Button onClick={() => setAddModalOpen(true)}>
+            <Button onClick={() => setAddModalOpen(true)} className="w-full sm:w-auto" size="sm">
               <RiAddLine className="mr-2 h-4 w-4" />
               Add Program Head
             </Button>
           </div>
           <Card className="py-2">
-            <CardContent className="pt-2 pb-2">
+            <CardContent className="pt-2 pb-2 px-3 sm:px-4 md:px-6">
               {isLoading ? (
                 <div className="py-8 text-muted-foreground">Loading...</div>
               ) : (

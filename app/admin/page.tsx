@@ -288,24 +288,24 @@ export default function AdminPage() {
       <AppSidebar />
       <SidebarInset>
         <SiteHeader />
-        <div className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+        <div className="flex flex-1 flex-col gap-4 p-3 sm:p-4 lg:gap-6 lg:p-6">
           <div>
-            <h1 className="text-2xl font-bold">Reports</h1>
-            <p className="text-muted-foreground text-sm mt-1">
+            <h1 className="text-xl font-bold sm:text-2xl">Reports</h1>
+            <p className="text-xs text-muted-foreground sm:text-sm mt-1">
               Browse, review, and take action on submitted reports from program heads
             </p>
           </div>
 
           <Card className="py-2">
-            <CardHeader className="pb-2">
-              <CardTitle>Reports</CardTitle>
-              <CardDescription>
+            <CardHeader className="pb-2 px-4 sm:px-6">
+              <CardTitle className="text-base sm:text-lg">Reports</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">
                 Browse reports by status and take action on pending submissions
               </CardDescription>
             </CardHeader>
-            <CardContent className="pt-2 pb-2">
+            <CardContent className="pt-2 pb-2 px-3 sm:px-4 md:px-6">
               <Tabs defaultValue="submitted" className="w-full">
-                <TabsList>
+                <TabsList className="w-full grid grid-cols-2 sm:w-auto sm:inline-flex lg:grid-cols-4">
                   <TabsTrigger value="submitted">
                     Pending Review ({submittedReports.length})
                   </TabsTrigger>

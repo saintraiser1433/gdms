@@ -105,8 +105,8 @@ export function ReportCatalogGrid({ reports, isLoading }: ReportCatalogGridProps
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-3">
+    <div className="space-y-3 sm:space-y-4">
+      <div className="flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
           <RiSearchLine className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -151,15 +151,15 @@ export function ReportCatalogGrid({ reports, isLoading }: ReportCatalogGridProps
           <p className="text-muted-foreground mt-1 text-sm">Try adjusting your search or filter criteria</p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredReports.map((report) => (
             <Card
               key={report.id}
               className="group overflow-hidden shadow-md transition-shadow hover:shadow-lg"
             >
-              <CardContent className="p-4 flex flex-col h-full">
-                <div className="flex items-start gap-3 mb-3">
-                  <div className="shrink-0 relative w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-rose-100 to-red-100 dark:from-rose-900/30 dark:to-red-900/30 flex items-center justify-center p-1">
+              <CardContent className="p-3 sm:p-4 flex flex-col h-full">
+                <div className="flex items-start gap-2 sm:gap-3 mb-3">
+                  <div className="shrink-0 relative w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden bg-gradient-to-br from-rose-100 to-red-100 dark:from-rose-900/30 dark:to-red-900/30 flex items-center justify-center p-1">
                     <Image
                       src={schoolLogoImg}
                       alt="Glan Institute of Technology"
@@ -169,8 +169,8 @@ export function ReportCatalogGrid({ reports, isLoading }: ReportCatalogGridProps
                     />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-medium line-clamp-2">{report.programName}</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
+                    <h3 className="text-sm font-medium line-clamp-2 sm:text-base">{report.programName}</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5 truncate">
                       {report.course} · {report.schoolYear}
                     </p>
                   </div>

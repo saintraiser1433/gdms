@@ -72,85 +72,85 @@ export function DashboardContent() {
       <AppSidebar />
       <SidebarInset>
         <SiteHeader />
-        <div className="flex flex-1 flex-col gap-6 p-4 lg:p-6">
+        <div className="flex flex-1 flex-col gap-4 p-3 sm:p-4 lg:gap-6 lg:p-6">
           <div>
-            <h1 className="text-3xl font-bold">
+            <h1 className="text-xl font-bold sm:text-2xl md:text-3xl">
               {isAdmin ? "Admin Dashboard" : "Dashboard"}
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-sm text-muted-foreground sm:text-base">
               Welcome back, {session?.user?.name}
             </p>
           </div>
 
           {/* Analytics */}
           <div>
-            <h2 className="mb-4 text-xl font-semibold">Analytics</h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            <h2 className="mb-3 text-lg font-semibold sm:mb-4 sm:text-xl">Analytics</h2>
+            <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
               <Card>
-                <CardContent className="flex items-center gap-4 pt-6">
-                  <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-red-800 to-rose-900 text-white shadow-lg">
-                    <IconReport className="size-6" />
+                <CardContent className="flex items-center gap-3 py-4 sm:gap-4 sm:pt-6">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-red-800 to-rose-900 text-white shadow-lg sm:size-12">
+                    <IconReport className="size-5 sm:size-6" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-2xl font-bold tabular-nums">{stats.total}</p>
-                    <p className="text-sm font-medium">Total Reports</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xl font-bold tabular-nums sm:text-2xl">{stats.total}</p>
+                    <p className="text-xs font-medium sm:text-sm">Total Reports</p>
+                    <p className="hidden text-xs text-muted-foreground sm:block">
                       All reports in the system
                     </p>
                   </div>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="flex items-center gap-4 pt-6">
-                  <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg">
-                    <IconFileText className="size-6" />
+                <CardContent className="flex items-center gap-3 py-4 sm:gap-4 sm:pt-6">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg sm:size-12">
+                    <IconFileText className="size-5 sm:size-6" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-2xl font-bold tabular-nums">{stats.draft}</p>
-                    <p className="text-sm font-medium">Draft</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xl font-bold tabular-nums sm:text-2xl">{stats.draft}</p>
+                    <p className="text-xs font-medium sm:text-sm">Draft</p>
+                    <p className="hidden text-xs text-muted-foreground sm:block">
                       Reports in progress
                     </p>
                   </div>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="flex items-center gap-4 pt-6">
-                  <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg">
-                    <IconClock className="size-6" />
+                <CardContent className="flex items-center gap-3 py-4 sm:gap-4 sm:pt-6">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg sm:size-12">
+                    <IconClock className="size-5 sm:size-6" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-2xl font-bold tabular-nums">{stats.submitted}</p>
-                    <p className="text-sm font-medium">Pending Review</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xl font-bold tabular-nums sm:text-2xl">{stats.submitted}</p>
+                    <p className="text-xs font-medium sm:text-sm">Pending Review</p>
+                    <p className="hidden text-xs text-muted-foreground sm:block">
                       Awaiting approval
                     </p>
                   </div>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="flex items-center gap-4 pt-6">
-                  <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-lg">
-                    <IconCheck className="size-6" />
+                <CardContent className="flex items-center gap-3 py-4 sm:gap-4 sm:pt-6">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-lg sm:size-12">
+                    <IconCheck className="size-5 sm:size-6" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-2xl font-bold tabular-nums">{stats.approved}</p>
-                    <p className="text-sm font-medium">Approved</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xl font-bold tabular-nums sm:text-2xl">{stats.approved}</p>
+                    <p className="text-xs font-medium sm:text-sm">Approved</p>
+                    <p className="hidden text-xs text-muted-foreground sm:block">
                       Completed reports
                     </p>
                   </div>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="flex items-center gap-4 pt-6">
-                  <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white shadow-lg">
-                    <IconX className="size-6" />
+                <CardContent className="flex items-center gap-3 py-4 sm:gap-4 sm:pt-6">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white shadow-lg sm:size-12">
+                    <IconX className="size-5 sm:size-6" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-2xl font-bold tabular-nums">{stats.disapproved}</p>
-                    <p className="text-sm font-medium">Disapproved</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xl font-bold tabular-nums sm:text-2xl">{stats.disapproved}</p>
+                    <p className="text-xs font-medium sm:text-sm">Disapproved</p>
+                    <p className="hidden text-xs text-muted-foreground sm:block">
                       Rejected reports
                     </p>
                   </div>
@@ -171,7 +171,7 @@ export function DashboardContent() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {!isAdmin && (
                   <Link href="/reports?create=1">
                     <Button

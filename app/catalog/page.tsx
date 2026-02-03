@@ -48,10 +48,10 @@ export default function ProgramHeadReportCatalogPage() {
       <AppSidebar />
       <SidebarInset>
         <SiteHeader />
-        <div className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+        <div className="flex flex-1 flex-col gap-4 p-3 sm:p-4 lg:gap-6 lg:p-6">
           <div>
-            <h1 className="text-2xl font-bold">Report Catalogs</h1>
-            <p className="text-muted-foreground text-sm mt-1">
+            <h1 className="text-xl font-bold sm:text-2xl">Report Catalogs</h1>
+            <p className="text-xs text-muted-foreground sm:text-sm mt-1">
               Browse approved reports for your course
             </p>
           </div>

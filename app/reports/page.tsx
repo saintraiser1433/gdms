@@ -202,28 +202,28 @@ export default function ReportsPage() {
       <AppSidebar />
       <SidebarInset>
         <SiteHeader />
-        <div className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+        <div className="flex flex-1 flex-col gap-4 p-3 sm:p-4 lg:gap-6 lg:p-6">
           <Card className="py-2">
-            <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-              <div>
-                <CardTitle className="text-2xl">Reports</CardTitle>
-                <CardDescription>
+            <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between space-y-0 pb-2 px-4 sm:px-6">
+              <div className="min-w-0">
+                <CardTitle className="text-xl sm:text-2xl">Reports</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
                   View and manage your community engagement reports
                 </CardDescription>
               </div>
               {isProgramHead && (
-                <Button onClick={() => setCreateModalOpen(true)}>
+                <Button onClick={() => setCreateModalOpen(true)} className="w-full sm:w-auto shrink-0" size="sm">
                   <RiAddLine className="w-4 h-4 mr-2" />
                   New Report
                 </Button>
               )}
             </CardHeader>
-            <CardContent className="pt-2 pb-2">
+            <CardContent className="pt-2 pb-2 px-3 sm:px-4 md:px-6">
               {isLoading ? (
                 <div className="text-muted-foreground py-8">Loading...</div>
               ) : isProgramHead ? (
                 <Tabs defaultValue="submitted" className="w-full">
-                  <TabsList>
+                  <TabsList className="w-full grid grid-cols-2 sm:w-auto sm:inline-flex md:grid-cols-5">
                     <TabsTrigger value="submitted">
                       Submitted ({submittedReports.length})
                     </TabsTrigger>

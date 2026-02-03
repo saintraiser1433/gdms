@@ -177,11 +177,34 @@ export default function ReportViewPage() {
   }
 
   if (isLoading) {
-    return <div>Loading...</div>
+    return (
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          <SiteHeader />
+          <div className="flex flex-1 items-center justify-center p-8">
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    )
   }
 
   if (!report) {
-    return <div>Report not found</div>
+    return (
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          <SiteHeader />
+          <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8">
+            <p className="text-muted-foreground">Report not found</p>
+            <Button variant="outline" onClick={() => router.push("/reports")}>
+              Back to Reports
+            </Button>
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    )
   }
 
   return (
@@ -189,60 +212,62 @@ export default function ReportViewPage() {
       <AppSidebar />
       <SidebarInset>
         <SiteHeader />
-        <div className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 print:p-0">
-          <div className="flex justify-between items-center print:hidden">
-            <div>
-              <h1 className="text-3xl font-bold">{report.programName}</h1>
-              <p className="text-muted-foreground">
+        <div className="flex flex-1 flex-col gap-4 p-3 sm:p-4 lg:gap-6 lg:p-6 print:p-0">
+          <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center print:hidden">
+            <div className="min-w-0">
+              <h1 className="text-xl font-bold truncate sm:text-2xl md:text-3xl">{report.programName}</h1>
+              <p className="text-sm text-muted-foreground sm:text-base">
                 {report.course} - {report.schoolYear}
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 shrink-0">
               {canResubmit && (
-                <Button onClick={() => router.push(`/reports/${report.id}/edit`)} variant="default">
-                  <RiEditLine className="w-4 h-4 mr-2" />
-                  Edit & Resubmit
+                <Button onClick={() => router.push(`/reports/${report.id}/edit`)} variant="default" size="sm" className="shrink-0">
+                  <RiEditLine className="w-4 h-4 mr-1.5 sm:mr-2" />
+                  <span className="hidden sm:inline">Edit & Resubmit</span>
+                  <span className="sm:hidden">Edit</span>
                 </Button>
               )}
-              <Button onClick={handleExportExcel} variant="default">
-                <RiFileExcel2Line className="w-4 h-4 mr-2" />
-                Download Excel
+              <Button onClick={handleExportExcel} variant="default" size="sm" className="shrink-0">
+                <RiFileExcel2Line className="w-4 h-4 mr-1.5 sm:mr-2" />
+                <span className="hidden sm:inline">Download Excel</span>
+                <span className="sm:hidden">Excel</span>
               </Button>
-              <Button variant="outline" onClick={() => router.push(isAdmin ? "/admin" : "/reports")}>
+              <Button variant="outline" size="sm" className="shrink-0" onClick={() => router.push(isAdmin ? "/admin" : "/reports")}>
                 Back
               </Button>
             </div>
           </div>
 
           <Card>
-            <CardHeader>
-              <CardTitle>Report Information</CardTitle>
+            <CardHeader className="px-4 py-3 sm:px-6 sm:py-4">
+              <CardTitle className="text-base sm:text-lg">Report Information</CardTitle>
             </CardHeader>
             <Separator className="mx-4 my-1" />
-            <CardContent className="space-y-2">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
+            <CardContent className="space-y-2 px-4 pb-4 sm:px-6 sm:pb-6">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 text-sm sm:text-base">
+                <div className="break-words">
                   <strong>Program Name:</strong> {report.programName}
                 </div>
-                <div>
+                <div className="break-words">
                   <strong>Implementation Period:</strong> {report.implementationPeriod}
                 </div>
-                <div>
+                <div className="break-words">
                   <strong>Responsible Person:</strong> {report.responsiblePerson}
                 </div>
-                <div>
+                <div className="break-words">
                   <strong>Location:</strong> {report.location}
                 </div>
-                <div>
+                <div className="break-words">
                   <strong>Course:</strong> {report.course}
                 </div>
-                <div>
+                <div className="break-words">
                   <strong>School Year:</strong> {report.schoolYear}
                 </div>
                 <div>
                   <strong>Status:</strong> <StatusBadge status={report.status} />
                 </div>
-                <div>
+                <div className="break-words">
                   <strong>Created By:</strong> {report.createdBy.name}
                 </div>
               </div>
@@ -253,17 +278,18 @@ export default function ReportViewPage() {
             const sectionComments = getCommentsFor("SECTION", objective.id)
             return (
             <Card key={objective.id}>
-              <CardHeader className="flex flex-row items-start justify-between gap-2">
-                <CardTitle>Objective {objIndex + 1}: {objective.title}</CardTitle>
+              <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <CardTitle className="text-base sm:text-lg min-w-0 break-words">Objective {objIndex + 1}: {objective.title}</CardTitle>
                 {isAdmin && (report.status === "SUBMITTED" || report.status === "DISAPPROVED") && (
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="shrink-0"
+                    className="shrink-0 h-7 sm:h-8"
                     onClick={() => openPinComment("SECTION", objective.id, `Objective ${objIndex + 1}: ${objective.title}`)}
+                    title="Pin comment"
                   >
-                    <RiPushpin2Line className="h-4 w-4 mr-1" />
-                    Pin comment
+                    <RiPushpin2Line className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
+                    <span className="hidden sm:inline">Pin comment</span>
                   </Button>
                 )}
               </CardHeader>
@@ -286,19 +312,20 @@ export default function ReportViewPage() {
                   const kpiComments = getCommentsFor("KPI", kpi.id)
                   return (
                   <div key={kpi.id} className="mb-6">
-                    <div className="flex items-start justify-between gap-2 mb-3">
-                      <h3 className="font-semibold">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between mb-3">
+                      <h3 className="font-semibold text-sm sm:text-base min-w-0 break-words">
                         KPI {kpiIndex + 1}: {kpi.description}
                       </h3>
                       {isAdmin && (report.status === "SUBMITTED" || report.status === "DISAPPROVED") && (
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="shrink-0 h-8"
+                          className="shrink-0 h-7 sm:h-8"
                           onClick={() => openPinComment("KPI", kpi.id, `KPI ${kpiIndex + 1}: ${kpi.description}`)}
+                          title="Pin comment"
                         >
                           <RiPushpin2Line className="h-3.5 w-3.5 mr-1" />
-                          Pin
+                          <span className="hidden sm:inline">Pin</span>
                         </Button>
                       )}
                     </div>
@@ -321,6 +348,7 @@ export default function ReportViewPage() {
                           type="button"
                           variant="default"
                           size="sm"
+                          className="shrink-0"
                           onClick={() => {
                             setDocumentsDialogAttachments(kpi.attachments)
                             setDocumentsDialogOpen(true)
@@ -332,40 +360,40 @@ export default function ReportViewPage() {
                       </div>
                     )}
                     {kpi.strategies.map((strategy: Strategy, stratIndex: number) => (
-                      <div key={strategy.id} className="mb-4 pl-4 border-l-2">
-                        <p className="font-medium mb-2">
+                      <div key={strategy.id} className="mb-4 pl-3 sm:pl-4 border-l-2">
+                        <p className="font-medium mb-2 text-sm sm:text-base break-words">
                           Strategy {stratIndex + 1}: {strategy.description}
                         </p>
-                        <p className="text-sm text-muted-foreground mb-3">
+                        <p className="text-xs sm:text-sm text-muted-foreground mb-3 break-words">
                           Target: {strategy.target}
                         </p>
-                        <div className="overflow-hidden rounded-lg border border-border">
-                          <Table>
+                        <div className="overflow-x-auto rounded-lg border border-border">
+                          <Table className="min-w-[640px]">
                             <TableHeader>
                               <TableRow className="bg-muted/50 hover:bg-muted/50 border-border">
-                                <TableHead className="px-1.5">Period</TableHead>
-                                <TableHead className="px-1.5">Activities</TableHead>
-                                <TableHead className="px-1.5">Status</TableHead>
-                                <TableHead className="px-1.5 text-right">Budget Allocated</TableHead>
-                                <TableHead className="px-1.5">Budget Source</TableHead>
-                                <TableHead className="px-1.5 text-right">Budget Spent</TableHead>
-                                <TableHead className="px-1.5 text-right">Variance</TableHead>
-                                {isAdmin && (report.status === "SUBMITTED" || report.status === "DISAPPROVED") && <TableHead className="w-12 px-1.5"></TableHead>}
+                                <TableHead className="px-2 py-2 text-xs sm:text-sm whitespace-nowrap">Period</TableHead>
+                                <TableHead className="px-2 py-2 text-xs sm:text-sm">Activities</TableHead>
+                                <TableHead className="px-2 py-2 text-xs sm:text-sm whitespace-nowrap">Status</TableHead>
+                                <TableHead className="px-2 py-2 text-xs sm:text-sm text-right whitespace-nowrap">Budget Alloc.</TableHead>
+                                <TableHead className="px-2 py-2 text-xs sm:text-sm whitespace-nowrap">Budget Source</TableHead>
+                                <TableHead className="px-2 py-2 text-xs sm:text-sm text-right whitespace-nowrap">Budget Spent</TableHead>
+                                <TableHead className="px-2 py-2 text-xs sm:text-sm text-right whitespace-nowrap">Variance</TableHead>
+                                {isAdmin && (report.status === "SUBMITTED" || report.status === "DISAPPROVED") && <TableHead className="w-10 px-1.5"></TableHead>}
                               </TableRow>
                             </TableHeader>
                             <TableBody>
                               {strategy.timeEntries.map((entry: TimeEntry) => (
                                 <Fragment key={entry.id}>
                                 <TableRow className="border-border">
-                                  <TableCell className="px-3">
+                                  <TableCell className="px-2 py-2 text-xs sm:text-sm">
                                     <span className="font-medium">{entry.period}</span>
                                     <br />
                                     <span className="text-xs text-muted-foreground">
                                       ({entry.periodStartMonth} - {entry.periodEndMonth})
                                     </span>
                                   </TableCell>
-                                  <TableCell className="px-3 whitespace-normal">{entry.activities || "-"}</TableCell>
-                                  <TableCell className="px-3">
+                                  <TableCell className="px-2 py-2 text-xs sm:text-sm whitespace-normal max-w-[120px] sm:max-w-none">{entry.activities || "-"}</TableCell>
+                                  <TableCell className="px-2 py-2 text-xs sm:text-sm">
                                     {entry.status ? (
                                       <div>
                                         <StatusBadge status={entry.status} />
@@ -375,10 +403,10 @@ export default function ReportViewPage() {
                                       </div>
                                     ) : "-"}
                                   </TableCell>
-                                  <TableCell className="px-3 text-right tabular-nums">₱{Number(entry.budgetAllocated).toLocaleString()}</TableCell>
-                                  <TableCell className="px-3">{entry.budgetSource || "-"}</TableCell>
-                                  <TableCell className="px-3 text-right tabular-nums">₱{Number(entry.budgetSpent).toLocaleString()}</TableCell>
-                                  <TableCell className="px-3 text-right tabular-nums">₱{Number(entry.variance).toLocaleString()}</TableCell>
+                                  <TableCell className="px-2 py-2 text-xs sm:text-sm text-right tabular-nums whitespace-nowrap">₱{Number(entry.budgetAllocated).toLocaleString()}</TableCell>
+                                  <TableCell className="px-2 py-2 text-xs sm:text-sm max-w-[80px] sm:max-w-none truncate" title={entry.budgetSource || ""}>{entry.budgetSource || "-"}</TableCell>
+                                  <TableCell className="px-2 py-2 text-xs sm:text-sm text-right tabular-nums whitespace-nowrap">₱{Number(entry.budgetSpent).toLocaleString()}</TableCell>
+                                  <TableCell className="px-2 py-2 text-xs sm:text-sm text-right tabular-nums whitespace-nowrap">₱{Number(entry.variance).toLocaleString()}</TableCell>
                                   {isAdmin && (report.status === "SUBMITTED" || report.status === "DISAPPROVED") && (
                                     <TableCell className="px-1">
                                       <Button
@@ -455,11 +483,11 @@ export default function ReportViewPage() {
       </Dialog>
 
       <Dialog open={documentsDialogOpen} onOpenChange={setDocumentsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
+        <DialogContent className="max-w-[min(95vw,42rem)] max-h-[85vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Documents / Pictures</DialogTitle>
           </DialogHeader>
-          <div className="flex-1 overflow-y-auto grid gap-4 py-4">
+          <div className="flex-1 overflow-y-auto grid gap-4 py-4 grid-cols-1 sm:grid-cols-2">
             {documentsDialogAttachments.map((att: { id: string; fileName: string; mimeType: string }) => {
               const isImage = att.mimeType?.startsWith("image/")
               const ext = att.fileName?.split(".").pop()?.toLowerCase() ?? ""

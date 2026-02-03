@@ -191,9 +191,9 @@ export function DataTableWrapper<T>({
   return (
     <div className={cn("flex flex-col gap-4", className)}>
       {(showSearch || showFilters) && (
-        <div className="flex flex-wrap items-stretch gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-stretch">
           {showSearch && (
-            <div className="relative w-64 shrink-0">
+            <div className="relative w-full shrink-0 sm:w-64">
               <IconSearch className="text-muted-foreground pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 z-10" />
               <Input
                 placeholder={searchPlaceholder}
@@ -213,7 +213,7 @@ export function DataTableWrapper<T>({
                 value={filterValues[f.columnId] || ALL_FILTER_VALUE}
                 onValueChange={(v) => handleFilterChange(f.columnId, v)}
               >
-                <SelectTrigger id={`filter-${f.columnId}`} className="h-9 min-h-9 w-64 shrink-0">
+                <SelectTrigger id={`filter-${f.columnId}`} className="h-9 min-h-9 w-full shrink-0 sm:w-64">
                   <SelectValue placeholder={`All ${f.label}`} />
                 </SelectTrigger>
                 <SelectContent>
@@ -228,8 +228,8 @@ export function DataTableWrapper<T>({
             ))}
         </div>
       )}
-      <div className="overflow-hidden rounded-lg border border-border">
-        <Table>
+      <div className="overflow-x-auto rounded-lg border border-border">
+        <Table className="min-w-[640px]">
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50">
               {selectable && (
@@ -341,7 +341,7 @@ export function DataTableWrapper<T>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex flex-col gap-2 border-t px-4 py-1.5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2 border-t px-3 py-2 sm:px-4 sm:py-1.5 sm:flex-row sm:items-center sm:justify-between">
         <div className="text-muted-foreground text-xs">
           {selectable
             ? `${selectedIds.size} of ${filteredAndSortedData.length} row(s) selected.`
