@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { StatusBadge } from "@/components/status-badge"
 import { exportReportToExcel } from "@/lib/excel-export"
 import { RiFileExcel2Line, RiEditLine, RiPushpin2Line, RiFileLine, RiFilePdfLine, RiFileWordLine, RiFileExcelLine, RiDownloadLine, RiEyeLine } from "@remixicon/react"
+import { IconChevronDown } from "@tabler/icons-react"
 import {
   Dialog,
   DialogContent,
@@ -102,6 +103,16 @@ export default function ReportViewPage() {
   const [isSubmittingComment, setIsSubmittingComment] = useState(false)
   const [documentsDialogOpen, setDocumentsDialogOpen] = useState(false)
   const [documentsDialogAttachments, setDocumentsDialogAttachments] = useState<{ id: string; fileName: string; mimeType: string }[]>([])
+  const [collapsedKpis, setCollapsedKpis] = useState<Set<string>>(new Set())
+
+  const toggleKpi = (id: string) => {
+    setCollapsedKpis((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
 
   const openPinComment = (type: "SECTION" | "KPI" | "CELL", id: string, label: string) => {
     setCommentPinTarget({ type, id, label })
@@ -240,8 +251,8 @@ export default function ReportViewPage() {
           </div>
 
           <Card>
-            <CardHeader className="px-4 py-3 sm:px-6 sm:py-4">
-              <CardTitle className="text-base sm:text-lg">Report Information</CardTitle>
+            <CardHeader className="px-3 py-2 sm:px-4 sm:py-3">
+              <CardTitle className="text-base font-bold sm:text-lg">Report Information</CardTitle>
             </CardHeader>
             <Separator className="mx-4 my-1" />
             <CardContent className="space-y-2 px-4 pb-4 sm:px-6 sm:pb-6">
@@ -279,7 +290,7 @@ export default function ReportViewPage() {
             return (
             <Card key={objective.id}>
               <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                <CardTitle className="text-base sm:text-lg min-w-0 break-words">Objective {objIndex + 1}: {objective.title}</CardTitle>
+                <CardTitle className="text-base font-bold sm:text-lg min-w-0 break-words">Objective {objIndex + 1}: {objective.title}</CardTitle>
                 {isAdmin && (report.status === "SUBMITTED" || report.status === "DISAPPROVED") && (
                   <Button
                     size="sm"
@@ -312,23 +323,37 @@ export default function ReportViewPage() {
                   const kpiComments = getCommentsFor("KPI", kpi.id)
                   return (
                   <div key={kpi.id} className="mb-6">
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between mb-3">
-                      <h3 className="font-semibold text-sm sm:text-base min-w-0 break-words">
-                        KPI {kpiIndex + 1}: {kpi.description}
-                      </h3>
+                    <button
+                      type="button"
+                      onClick={() => toggleKpi(kpi.id)}
+                      className="flex w-full flex-col gap-2 text-left sm:flex-row sm:items-start sm:justify-between mb-3 group"
+                    >
+                      <div className="flex items-start gap-2 min-w-0">
+                        <IconChevronDown
+                          className={`size-5 shrink-0 mt-0.5 transition-transform text-muted-foreground group-hover:text-foreground ${collapsedKpis.has(kpi.id) ? "-rotate-90" : ""}`}
+                        />
+                        <h3 className="font-semibold text-sm sm:text-base min-w-0 break-words">
+                          KPI {kpiIndex + 1}: {kpi.description}
+                        </h3>
+                      </div>
                       {isAdmin && (report.status === "SUBMITTED" || report.status === "DISAPPROVED") && (
                         <Button
                           size="sm"
                           variant="ghost"
                           className="shrink-0 h-7 sm:h-8"
-                          onClick={() => openPinComment("KPI", kpi.id, `KPI ${kpiIndex + 1}: ${kpi.description}`)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            openPinComment("KPI", kpi.id, `KPI ${kpiIndex + 1}: ${kpi.description}`)
+                          }}
                           title="Pin comment"
                         >
                           <RiPushpin2Line className="h-3.5 w-3.5 mr-1" />
                           <span className="hidden sm:inline">Pin</span>
                         </Button>
                       )}
-                    </div>
+                    </button>
+                    {!collapsedKpis.has(kpi.id) && (
+                    <>
                     {kpiComments.length > 0 && (
                       <div className="mb-3 space-y-2">
                         {kpiComments.map((c) => (
@@ -442,6 +467,8 @@ export default function ReportViewPage() {
                         </div>
                       </div>
                     ))}
+                    </>
+                    )}
                   </div>
                 )})}
               </CardContent>
