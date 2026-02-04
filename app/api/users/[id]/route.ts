@@ -18,7 +18,7 @@ export async function PATCH(
 
     const { id } = await params
     const body = await request.json()
-    const { name, email, password, courseId, status } = body
+    const { name, email, password, courseId, status, position } = body
 
     const existingUser = await prisma.user.findUnique({
       where: { id },
@@ -38,6 +38,7 @@ export async function PATCH(
       passwordHash?: string
       courseId?: string | null
       status?: "ACTIVE" | "INACTIVE"
+      position?: "DEAN" | "PROGRAM_HEAD" | "INSTRUCTOR"
     } = {}
 
     if (name !== undefined && typeof name === "string") {
@@ -84,25 +85,16 @@ export async function PATCH(
             { status: 400 }
           )
         }
-        const existingProgramHeadForCourse = await prisma.user.findFirst({
-          where: {
-            role: "PROGRAM_HEAD",
-            courseId: course.id,
-            NOT: { id },
-          },
-        })
-        if (existingProgramHeadForCourse) {
-          return NextResponse.json(
-            { error: "This course already has a program head assigned. Only one program head per course is allowed." },
-            { status: 409 }
-          )
-        }
         updates.courseId = course.id
       }
     }
 
     if (status !== undefined && (status === "ACTIVE" || status === "INACTIVE")) {
       updates.status = status
+    }
+
+    if (position !== undefined && ["DEAN", "PROGRAM_HEAD", "INSTRUCTOR"].includes(position)) {
+      updates.position = position
     }
 
     const user = await prisma.user.update({
@@ -113,6 +105,7 @@ export async function PATCH(
         email: true,
         name: true,
         role: true,
+        position: true,
         status: true,
         courseId: true,
         course: { select: { id: true, name: true } },
@@ -125,6 +118,55 @@ export async function PATCH(
     console.error("Failed to update user:", error)
     return NextResponse.json(
       { error: "Failed to update user" },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await auth()
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+    if (session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    }
+
+    const { id } = await params
+
+    const existingUser = await prisma.user.findUnique({
+      where: { id },
+      include: { _count: { select: { createdReports: true } } },
+    })
+
+    if (!existingUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    }
+
+    if (existingUser.role !== "PROGRAM_HEAD") {
+      return NextResponse.json({ error: "Can only delete program head users" }, { status: 403 })
+    }
+
+    if (existingUser._count.createdReports > 0) {
+      return NextResponse.json(
+        { error: "Cannot delete user with existing reports. Reassign or delete the reports first." },
+        { status: 400 }
+      )
+    }
+
+    await prisma.user.delete({
+      where: { id },
+    })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("Failed to delete user:", error)
+    return NextResponse.json(
+      { error: "Failed to delete user" },
       { status: 500 }
     )
   }

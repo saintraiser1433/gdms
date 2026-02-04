@@ -11,6 +11,7 @@ declare module "next-auth" {
     email: string
     name: string
     role: string
+    position?: string
   }
 
   interface Session {
@@ -19,6 +20,7 @@ declare module "next-auth" {
       email: string
       name: string
       role: string
+      position?: string
     }
   }
 }
@@ -27,6 +29,7 @@ declare module "@auth/core/jwt" {
   interface JWT {
     id: string
     role: string
+    position?: string
   }
 }
 
@@ -70,7 +73,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           id: user.id,
           email: user.email,
           name: user.name,
-          role: user.role
+          role: user.role,
+          position: user.position ?? undefined
         }
       }
     })

@@ -15,6 +15,7 @@ model User {
   passwordHash String     @map("password_hash")
   name         String
   role         Role       @default(PROGRAM_HEAD)
+  position     Position?  @default(PROGRAM_HEAD)
   status       UserStatus @default(ACTIVE)
   courseId     String?    @map("course_id")
   course       Course?    @relation(fields: [courseId], references: [id])
@@ -186,6 +187,12 @@ model Course {
 enum Role {
   ADMIN
   PROGRAM_HEAD
+}
+
+enum Position {
+  DEAN
+  PROGRAM_HEAD
+  INSTRUCTOR
 }
 
 enum UserStatus {

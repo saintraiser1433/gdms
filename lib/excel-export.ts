@@ -103,6 +103,20 @@ export async function exportReportToExcel(report: Report): Promise<void> {
   worksheet.getCell(currentRow, 2).value = report.location ?? ""
   worksheet.getCell(currentRow, 2).style = valueStyle
   worksheet.getRow(currentRow).height = defaultRowHeight
+  currentRow++
+
+  worksheet.getCell(currentRow, 1).value = "Program:"
+  worksheet.getCell(currentRow, 1).style = headerStyle
+  worksheet.getCell(currentRow, 2).value = report.course ?? ""
+  worksheet.getCell(currentRow, 2).style = valueStyle
+  worksheet.getRow(currentRow).height = defaultRowHeight
+  currentRow++
+
+  worksheet.getCell(currentRow, 1).value = "School Year:"
+  worksheet.getCell(currentRow, 1).style = headerStyle
+  worksheet.getCell(currentRow, 2).value = report.schoolYear ?? ""
+  worksheet.getCell(currentRow, 2).style = valueStyle
+  worksheet.getRow(currentRow).height = defaultRowHeight
   currentRow += 2
 
   // Process each objective

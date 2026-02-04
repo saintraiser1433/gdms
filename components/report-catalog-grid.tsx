@@ -17,6 +17,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+const POSITION_LABELS: Record<string, string> = {
+  DEAN: "Dean",
+  PROGRAM_HEAD: "Program Head",
+  INSTRUCTOR: "Instructor",
+}
+
 interface CatalogReport {
   id: string
   programName: string
@@ -28,6 +34,7 @@ interface CatalogReport {
     id: string
     name: string
     email: string
+    position?: string | null
   }
 }
 
@@ -53,7 +60,8 @@ export function ReportCatalogGrid({ reports, isLoading }: ReportCatalogGridProps
           (r.location ?? "").toLowerCase().includes(q) ||
           r.course.toLowerCase().includes(q) ||
           r.schoolYear.toLowerCase().includes(q) ||
-          (r.createdBy?.name ?? "").toLowerCase().includes(q)
+          (r.createdBy?.name ?? "").toLowerCase().includes(q) ||
+          (r.createdBy?.position ? POSITION_LABELS[r.createdBy.position] ?? r.createdBy.position : "").toLowerCase().includes(q)
       )
     }
     if (courseFilter && courseFilter !== "all") {
@@ -118,10 +126,10 @@ export function ReportCatalogGrid({ reports, isLoading }: ReportCatalogGridProps
         </div>
         <Select value={courseFilter} onValueChange={setCourseFilter}>
           <SelectTrigger className="w-full sm:w-[180px] h-9">
-            <SelectValue placeholder="All Courses" />
+            <SelectValue placeholder="All Programs" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Courses</SelectItem>
+            <SelectItem value="all">All Programs</SelectItem>
             {courses.map((c) => (
               <SelectItem key={c} value={c}>
                 {c}
@@ -189,9 +197,15 @@ export function ReportCatalogGrid({ reports, isLoading }: ReportCatalogGridProps
                     </p>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    <span className="font-medium text-foreground">Program Head:</span>{" "}
+                    <span className="font-medium text-foreground">Assigned Incharge:</span>{" "}
                     {report.createdBy?.name ?? "—"}
                   </p>
+                  {report.createdBy?.position && (
+                    <p className="text-xs text-muted-foreground">
+                      <span className="font-medium text-foreground">Position:</span>{" "}
+                      {POSITION_LABELS[report.createdBy.position] ?? report.createdBy.position}
+                    </p>
+                  )}
                   <Button
                     size="sm"
                     variant="outline"

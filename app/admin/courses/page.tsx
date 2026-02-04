@@ -170,7 +170,7 @@ export default function CoursesPage() {
     },
     {
       id: "name",
-      header: "Course Name",
+      header: "Program Name",
       sortable: true,
       getSortValue: (row: Course) => row.name,
       cell: (row: Course) => <div className="font-medium">{row.name}</div>,
@@ -226,14 +226,14 @@ export default function CoursesPage() {
         <div className="flex flex-1 flex-col gap-4 p-3 sm:p-4 lg:gap-6 lg:p-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-4">
             <div>
-              <h1 className="text-xl font-bold sm:text-2xl">Courses</h1>
+              <h1 className="text-xl font-bold sm:text-2xl">Program</h1>
               <p className="text-xs text-muted-foreground sm:text-sm mt-1">
-                Add and manage course offerings for reports
+                Add and manage programs for reports
               </p>
             </div>
             <Button onClick={() => setAddModalOpen(true)} className="w-full sm:w-auto" size="sm">
               <RiAddLine className="mr-2 h-4 w-4" />
-              Add Course
+              Add Program
             </Button>
           </div>
           <Card className="py-2">
@@ -245,15 +245,15 @@ export default function CoursesPage() {
                   columns={columns}
                   data={courses}
                   getRowId={(row) => row.id}
-                  emptyMessage="No courses yet"
-                  emptyStateDescription="Add courses that can be selected when creating reports"
+                  emptyMessage="No programs yet"
+                  emptyStateDescription="Add programs that can be selected when creating reports"
                   emptyStateAction={
                     <Button onClick={() => setAddModalOpen(true)}>
                       <RiAddLine className="mr-2 h-4 w-4" />
-                      Add Course
+                      Add Program
                     </Button>
                   }
-                  searchPlaceholder="Search courses..."
+                  searchPlaceholder="Search programs..."
                   getSearchableText={(row) => `${row.name} ${row.abbreviation ?? ""}`.trim()}
                 />
               )}
@@ -263,13 +263,13 @@ export default function CoursesPage() {
       </SidebarInset>
 
       <Dialog open={addModalOpen} onOpenChange={setAddModalOpen}>
-        <DialogContent title="Add Course" className="max-w-md">
+        <DialogContent title="Add Program" className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Add Course</DialogTitle>
+            <DialogTitle>Add Program</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleAddCourse} className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="course-name">Course Name</Label>
+              <Label htmlFor="course-name">Program Name</Label>
               <Input
                 id="course-name"
                 value={newCourseName}
@@ -307,13 +307,13 @@ export default function CoursesPage() {
       </Dialog>
 
       <Dialog open={editModalOpen} onOpenChange={(open) => !open && closeEditModal()}>
-        <DialogContent title="Edit Course" className="max-w-md">
+        <DialogContent title="Edit Program" className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Edit Course</DialogTitle>
+            <DialogTitle>Edit Program</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleEditCourse} className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="edit-course-name">Course Name</Label>
+              <Label htmlFor="edit-course-name">Program Name</Label>
               <Input
                 id="edit-course-name"
                 value={editName}
@@ -356,7 +356,7 @@ export default function CoursesPage() {
           setDeleteDialogOpen(open)
           if (!open) setCourseToDelete(null)
         }}
-        title="Delete course?"
+        title="Delete program?"
         description={
           courseToDelete
             ? `Are you sure you want to delete "${courseToDelete.name}"? This action cannot be undone.`

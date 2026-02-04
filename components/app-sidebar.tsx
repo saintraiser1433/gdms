@@ -41,7 +41,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           icon: IconReport,
         },
         {
-          title: "Courses",
+          title: "Program",
           url: "/admin/courses",
           icon: IconSchool,
         },
@@ -116,6 +116,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             name: session?.user?.name || "User",
             email: session?.user?.email || "",
             avatar: "",
+            position: session?.user?.position,
+            role: session?.user?.role,
           }}
         />
       </SidebarFooter>

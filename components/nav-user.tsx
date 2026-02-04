@@ -50,6 +50,12 @@ import { Input } from "@/components/ui/input"
 const getDiceBearAvatar = (seed: string) =>
   `https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${encodeURIComponent(seed || "user")}`
 
+const POSITION_LABELS: Record<string, string> = {
+  DEAN: "Dean",
+  PROGRAM_HEAD: "Program Head",
+  INSTRUCTOR: "Instructor",
+}
+
 export function NavUser({
   user,
 }: {
@@ -57,6 +63,8 @@ export function NavUser({
     name: string
     email: string
     avatar: string
+    position?: string
+    role?: string
   }
 }) {
   const { isMobile } = useSidebar()
@@ -126,7 +134,7 @@ export function NavUser({
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
                 <span className="text-muted-foreground truncate text-xs">
-                  {user.email}
+                  {user.role === "ADMIN" ? "Admin" : user.position ? (POSITION_LABELS[user.position] ?? user.position) : "Assigned Incharge"}
                 </span>
               </div>
               <IconDotsVertical className="ml-auto size-4" />
@@ -151,6 +159,11 @@ export function NavUser({
                   <span className="text-muted-foreground truncate text-xs">
                     {user.email}
                   </span>
+                  {(user.position || user.role === "ADMIN") && (
+                    <span className="text-muted-foreground truncate text-xs">
+                      {user.role === "ADMIN" ? "Admin" : POSITION_LABELS[user.position!] ?? user.position}
+                    </span>
+                  )}
                 </div>
               </div>
             </DropdownMenuLabel>

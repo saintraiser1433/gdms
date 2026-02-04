@@ -122,7 +122,7 @@ function ReportsPageContent() {
     },
     {
       id: "course",
-      header: "Course",
+      header: "Program",
       sortable: true,
       getSortValue: (row: Report) => row.course,
       cell: (row: Report) => row.course,

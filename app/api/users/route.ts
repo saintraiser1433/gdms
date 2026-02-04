@@ -20,6 +20,7 @@ export async function GET() {
         email: true,
         name: true,
         role: true,
+        position: true,
         status: true,
         courseId: true,
         course: { select: { id: true, name: true } },
@@ -31,8 +32,10 @@ export async function GET() {
     return NextResponse.json(users)
   } catch (error) {
     console.error("Failed to fetch users:", error)
+    const msg = error instanceof Error ? error.message : "Unknown error"
+    const isDbError = msg.includes("connect") || msg.includes("ECONNREFUSED") || msg.includes("prisma")
     return NextResponse.json(
-      { error: "Failed to fetch users" },
+      { error: isDbError ? "Database connection failed. Check that PostgreSQL is running." : "Failed to fetch users" },
       { status: 500 }
     )
   }
@@ -49,7 +52,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { email, name, password, courseId, status } = body
+    const { email, name, password, courseId, status, position } = body
 
     if (!email || typeof email !== "string") {
       return NextResponse.json(
@@ -90,19 +93,6 @@ export async function POST(request: Request) {
       )
     }
 
-    const existingProgramHeadForCourse = await prisma.user.findFirst({
-      where: {
-        role: "PROGRAM_HEAD",
-        courseId: course.id,
-      },
-    })
-    if (existingProgramHeadForCourse) {
-      return NextResponse.json(
-        { error: "This course already has a program head assigned. Only one program head per course is allowed." },
-        { status: 409 }
-      )
-    }
-
     const existing = await prisma.user.findUnique({
       where: { email: trimmedEmail },
     })
@@ -115,12 +105,15 @@ export async function POST(request: Request) {
 
     const passwordHash = await bcrypt.hash(password, 10)
 
+    const validPosition = ["DEAN", "PROGRAM_HEAD", "INSTRUCTOR"].includes(position) ? position : "PROGRAM_HEAD"
+
     const user = await prisma.user.create({
       data: {
         email: trimmedEmail,
         name: trimmedName,
         passwordHash,
         role: "PROGRAM_HEAD",
+        position: validPosition,
         status: userStatus,
         courseId: course.id,
       },
@@ -129,6 +122,7 @@ export async function POST(request: Request) {
         email: true,
         name: true,
         role: true,
+        position: true,
         status: true,
         courseId: true,
         course: { select: { id: true, name: true } },

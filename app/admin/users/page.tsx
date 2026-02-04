@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { RiAddLine, RiEditLine, RiMore2Line } from "@remixicon/react"
+import { RiAddLine, RiEditLine, RiMore2Line, RiDeleteBinLine } from "@remixicon/react"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
@@ -25,17 +25,25 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
 
 interface Course {
   id: string
   name: string
 }
 
+const POSITION_OPTIONS = [
+  { value: "DEAN", label: "Dean" },
+  { value: "PROGRAM_HEAD", label: "Program Head" },
+  { value: "INSTRUCTOR", label: "Instructor" },
+] as const
+
 interface User {
   id: string
   email: string
   name: string
   role: string
+  position?: string | null
   status: string
   course?: { id: string; name: string } | null
   createdAt: string
@@ -51,6 +59,7 @@ export default function UsersPage() {
     email: "",
     password: "",
     courseId: "",
+    position: "PROGRAM_HEAD" as string,
     status: "ACTIVE",
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -61,9 +70,13 @@ export default function UsersPage() {
     email: "",
     password: "",
     courseId: "",
+    position: "PROGRAM_HEAD" as string,
     status: "ACTIVE",
   })
   const [isUpdating, setIsUpdating] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [userToDelete, setUserToDelete] = useState<User | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     fetchUsers()
@@ -78,13 +91,27 @@ export default function UsersPage() {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch("/api/users")
-      if (response.ok) {
-        const data = await response.json()
-        setUsers(data)
+      const response = await fetch("/api/users", { cache: "no-store", credentials: "include" })
+      const contentType = response.headers.get("content-type")
+      let data: unknown
+      try {
+        data = contentType?.includes("application/json")
+          ? await response.json()
+          : { error: `Server error (${response.status})` }
+      } catch {
+        data = { error: `Server returned invalid response (${response.status})` }
       }
-    } catch {
-      toast.error("Failed to fetch users")
+      if (response.ok) {
+        setUsers(Array.isArray(data) ? data : [])
+      } else {
+        const errMsg = (data as { error?: string })?.error ?? `Failed to fetch users (${response.status})`
+        toast.error(errMsg)
+        setUsers([])
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to fetch users"
+      toast.error(msg.includes("fetch") ? "Cannot reach server. Is the app running?" : msg)
+      setUsers([])
     } finally {
       setIsLoading(false)
     }
@@ -109,17 +136,19 @@ export default function UsersPage() {
           email: formData.email.trim(),
           password: formData.password,
           courseId: formData.courseId,
+          position: formData.position,
           status: formData.status,
         }),
       })
       const data = await response.json()
       if (response.ok) {
-        toast.success("Program head added successfully")
+        toast.success("Assigned Incharge added successfully")
         setFormData({
           name: "",
           email: "",
           password: "",
           courseId: "",
+          position: "PROGRAM_HEAD",
           status: "ACTIVE",
         })
         setAddModalOpen(false)
@@ -134,6 +163,34 @@ export default function UsersPage() {
     }
   }
 
+  const openDeleteDialog = (user: User) => {
+    setUserToDelete(user)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete) return
+    setIsDeleting(true)
+    try {
+      const response = await fetch(`/api/users/${userToDelete.id}`, {
+        method: "DELETE",
+      })
+      const data = await response.json()
+      if (response.ok) {
+        toast.success("User deleted successfully")
+        setDeleteDialogOpen(false)
+        setUserToDelete(null)
+        fetchUsers()
+      } else {
+        toast.error(data.error || "Failed to delete user")
+      }
+    } catch {
+      toast.error("Failed to delete user")
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   const openEditModal = (user: User) => {
     setEditingUser(user)
     setEditFormData({
@@ -141,6 +198,7 @@ export default function UsersPage() {
       email: user.email,
       password: "",
       courseId: user.course?.id ?? "",
+      position: user.position ?? "PROGRAM_HEAD",
       status: user.status ?? "ACTIVE",
     })
     setEditModalOpen(true)
@@ -156,6 +214,7 @@ export default function UsersPage() {
         name: editFormData.name.trim(),
         email: editFormData.email.trim(),
         courseId: editFormData.courseId || null,
+        position: editFormData.position,
         status: editFormData.status,
       }
       if (editFormData.password && editFormData.password.length >= 6) {
@@ -240,7 +299,7 @@ export default function UsersPage() {
     },
     {
       id: "course",
-      header: "Course",
+      header: "Program",
       sortable: true,
       getSortValue: (row: User) => row.course?.name ?? "",
       cell: (row: User) => (
@@ -277,13 +336,24 @@ export default function UsersPage() {
       ),
     },
     {
+      id: "position",
+      header: "Position",
+      sortable: true,
+      getSortValue: (row: User) => row.position ?? "",
+      cell: (row: User) => (
+        <span className="text-muted-foreground">
+          {row.position ? POSITION_OPTIONS.find((p) => p.value === row.position)?.label ?? row.position : "—"}
+        </span>
+      ),
+    },
+    {
       id: "role",
       header: "Role",
       sortable: true,
       getSortValue: (row: User) => row.role,
       cell: (row: User) => (
         <span className="text-muted-foreground">
-          {row.role === "PROGRAM_HEAD" ? "Program Head" : row.role}
+          {row.role === "PROGRAM_HEAD" ? "Assigned Incharge" : row.role}
         </span>
       ),
     },
@@ -307,6 +377,13 @@ export default function UsersPage() {
               <RiEditLine className="h-4 w-4 mr-2" />
               Edit
             </DropdownMenuItem>
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => openDeleteDialog(row)}
+            >
+              <RiDeleteBinLine className="h-4 w-4 mr-2" />
+              Delete
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       ),
@@ -324,12 +401,12 @@ export default function UsersPage() {
             <div>
               <h1 className="text-xl font-bold sm:text-2xl">User Management</h1>
               <p className="text-xs text-muted-foreground sm:text-sm mt-1">
-                Add and manage program heads who can create and submit reports
+                Add and manage assigned incharges who can create and submit reports
               </p>
             </div>
             <Button onClick={() => setAddModalOpen(true)} className="w-full sm:w-auto" size="sm">
               <RiAddLine className="mr-2 h-4 w-4" />
-              Add Program Head
+              Assigned Incharge
             </Button>
           </div>
           <Card className="py-2">
@@ -341,17 +418,17 @@ export default function UsersPage() {
                   columns={columns}
                   data={users}
                   getRowId={(row) => row.id}
-                  emptyMessage="No program heads yet"
-                  emptyStateDescription="Add program heads to allow them to create and submit reports"
+                  emptyMessage="No assigned incharges yet"
+                  emptyStateDescription="Add assigned incharges to allow them to create and submit reports"
                   emptyStateAction={
                     <Button onClick={() => setAddModalOpen(true)}>
                       <RiAddLine className="mr-2 h-4 w-4" />
-                      Add Program Head
+                      Assigned Incharge
                     </Button>
                   }
                   searchPlaceholder="Search users..."
                   getSearchableText={(row) =>
-                    `${row.name} ${row.email} ${row.role} ${row.course?.name ?? ""} ${row.status}`
+                    `${row.name} ${row.email} ${row.role} ${row.position ?? ""} ${row.course?.name ?? ""} ${row.status}`
                   }
                 />
               )}
@@ -361,9 +438,9 @@ export default function UsersPage() {
       </SidebarInset>
 
       <Dialog open={addModalOpen} onOpenChange={setAddModalOpen}>
-        <DialogContent title="Add Program Head" className="max-w-md">
+        <DialogContent title="Assigned Incharge" className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Add Program Head</DialogTitle>
+            <DialogTitle>Assigned Incharge</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleAddUser} className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
@@ -409,7 +486,7 @@ export default function UsersPage() {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="user-course">Course</Label>
+              <Label htmlFor="user-course">Program</Label>
               <Select
                 value={formData.courseId}
                 onValueChange={(v) =>
@@ -419,7 +496,7 @@ export default function UsersPage() {
                 disabled={isSubmitting}
               >
                 <SelectTrigger id="user-course" className="w-full">
-                  <SelectValue placeholder="Select course" />
+                  <SelectValue placeholder="Select program" />
                 </SelectTrigger>
                 <SelectContent>
                   {courses.map((c) => (
@@ -431,9 +508,30 @@ export default function UsersPage() {
               </Select>
               {courses.length === 0 && (
                 <p className="text-xs text-muted-foreground">
-                  Add courses in the Courses module first.
+                  Add programs in the Program module first.
                 </p>
               )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="user-position">Position</Label>
+              <Select
+                value={formData.position}
+                onValueChange={(v) =>
+                  setFormData((p) => ({ ...p, position: v }))
+                }
+                disabled={isSubmitting}
+              >
+                <SelectTrigger id="user-position" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {POSITION_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="user-status">Status</Label>
@@ -472,7 +570,7 @@ export default function UsersPage() {
                   !formData.courseId
                 }
               >
-                {isSubmitting ? "Adding..." : "Add Program Head"}
+                {isSubmitting ? "Adding..." : "Add"}
               </Button>
             </div>
           </form>
@@ -486,9 +584,9 @@ export default function UsersPage() {
           if (!open) setEditingUser(null)
         }}
       >
-        <DialogContent title="Edit Program Head" className="max-w-md">
+        <DialogContent title="Edit Assigned Incharge" className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Edit Program Head</DialogTitle>
+            <DialogTitle>Edit Assigned Incharge</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleUpdateUser} className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
@@ -533,7 +631,7 @@ export default function UsersPage() {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="edit-user-course">Course</Label>
+              <Label htmlFor="edit-user-course">Program</Label>
               <Select
                 value={editFormData.courseId || "__none__"}
                 onValueChange={(v) =>
@@ -545,13 +643,34 @@ export default function UsersPage() {
                 disabled={isUpdating}
               >
                 <SelectTrigger id="edit-user-course" className="w-full">
-                  <SelectValue placeholder="Select course" />
+                  <SelectValue placeholder="Select program" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__none__">None</SelectItem>
                   {courses.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="edit-user-position">Position</Label>
+              <Select
+                value={editFormData.position}
+                onValueChange={(v) =>
+                  setEditFormData((p) => ({ ...p, position: v }))
+                }
+                disabled={isUpdating}
+              >
+                <SelectTrigger id="edit-user-position" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {POSITION_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -598,6 +717,22 @@ export default function UsersPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          setDeleteDialogOpen(open)
+          if (!open) setUserToDelete(null)
+        }}
+        title="Delete user?"
+        description={
+          userToDelete
+            ? `Are you sure you want to delete "${userToDelete.name}"? This action cannot be undone.`
+            : "Are you sure you want to delete this user? This action cannot be undone."
+        }
+        onConfirm={handleDeleteConfirm}
+        isLoading={isDeleting}
+      />
     </SidebarProvider>
   )
 }

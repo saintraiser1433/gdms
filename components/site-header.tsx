@@ -21,7 +21,7 @@ const PATH_LABELS: Record<string, string> = {
   dashboard: "Dashboard",
   admin: "Reports",
   reports: "Reports",
-  courses: "Courses",
+  courses: "Program",
   users: "User Management",
   catalog: "Report Catalogs",
 }

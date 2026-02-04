@@ -52,7 +52,7 @@ export default function ProgramHeadReportCatalogPage() {
           <div>
             <h1 className="text-xl font-bold sm:text-2xl">Report Catalogs</h1>
             <p className="text-xs text-muted-foreground sm:text-sm mt-1">
-              Browse approved reports for your course
+              Browse approved reports for your program
             </p>
           </div>
           <ReportCatalogGrid reports={reports} isLoading={isLoading} />

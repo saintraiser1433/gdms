@@ -256,7 +256,7 @@ export default function ReportViewPage() {
             </CardHeader>
             <Separator className="mx-4 my-1" />
             <CardContent className="space-y-2 px-4 pb-4 sm:px-6 sm:pb-6">
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 text-sm sm:text-base">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 text-xs sm:text-sm">
                 <div className="break-words">
                   <strong>Program Name:</strong> {report.programName}
                 </div>
@@ -270,7 +270,7 @@ export default function ReportViewPage() {
                   <strong>Location:</strong> {report.location}
                 </div>
                 <div className="break-words">
-                  <strong>Course:</strong> {report.course}
+                  <strong>Program:</strong> {report.course}
                 </div>
                 <div className="break-words">
                   <strong>School Year:</strong> {report.schoolYear}
@@ -323,35 +323,32 @@ export default function ReportViewPage() {
                   const kpiComments = getCommentsFor("KPI", kpi.id)
                   return (
                   <div key={kpi.id} className="mb-6">
-                    <button
-                      type="button"
-                      onClick={() => toggleKpi(kpi.id)}
-                      className="flex w-full flex-col gap-2 text-left sm:flex-row sm:items-start sm:justify-between mb-3 group"
-                    >
-                      <div className="flex items-start gap-2 min-w-0">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between mb-3">
+                      <button
+                        type="button"
+                        onClick={() => toggleKpi(kpi.id)}
+                        className="flex items-start gap-2 min-w-0 text-left group"
+                      >
                         <IconChevronDown
                           className={`size-5 shrink-0 mt-0.5 transition-transform text-muted-foreground group-hover:text-foreground ${collapsedKpis.has(kpi.id) ? "-rotate-90" : ""}`}
                         />
                         <h3 className="font-semibold text-sm sm:text-base min-w-0 break-words">
                           KPI {kpiIndex + 1}: {kpi.description}
                         </h3>
-                      </div>
+                      </button>
                       {isAdmin && (report.status === "SUBMITTED" || report.status === "DISAPPROVED") && (
                         <Button
                           size="sm"
                           variant="ghost"
                           className="shrink-0 h-7 sm:h-8"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            openPinComment("KPI", kpi.id, `KPI ${kpiIndex + 1}: ${kpi.description}`)
-                          }}
+                          onClick={() => openPinComment("KPI", kpi.id, `KPI ${kpiIndex + 1}: ${kpi.description}`)}
                           title="Pin comment"
                         >
                           <RiPushpin2Line className="h-3.5 w-3.5 mr-1" />
                           <span className="hidden sm:inline">Pin</span>
                         </Button>
                       )}
-                    </button>
+                    </div>
                     {!collapsedKpis.has(kpi.id) && (
                     <>
                     {kpiComments.length > 0 && (

@@ -8,7 +8,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { toast } from "sonner"
-import { RiEyeLine, RiCheckLine, RiCloseLine, RiMore2Line } from "@remixicon/react"
+import { RiEyeLine, RiCheckLine, RiCloseLine, RiMore2Line, RiDeleteBinLine } from "@remixicon/react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DataTableWrapper } from "@/components/data-table-wrapper"
 import { StatusBadge } from "@/components/status-badge"
@@ -21,6 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,11 +47,13 @@ function ReportTable({
   reports,
   onApprove,
   onDisapprove,
+  onDelete,
   isLoading,
 }: {
   reports: Report[]
   onApprove: (report: Report) => void
   onDisapprove: (report: Report) => void
+  onDelete: (report: Report) => void
   isLoading: boolean
 }) {
   const router = useRouter()
@@ -72,7 +75,7 @@ function ReportTable({
     },
     {
       id: "course",
-      header: "Course",
+      header: "Program",
       sortable: true,
       getSortValue: (row: Report) => row.course,
       cell: (row: Report) => <span className="text-muted-foreground">{row.course}</span>,
@@ -141,6 +144,13 @@ function ReportTable({
                 </DropdownMenuItem>
               </>
             )}
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => onDelete(row)}
+            >
+              <RiDeleteBinLine className="h-4 w-4 mr-2" />
+              Delete
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       ),
@@ -175,7 +185,7 @@ function ReportTable({
         },
         {
           columnId: "course",
-          label: "Course",
+          label: "Program",
           options: [...new Set(reports.map((r) => r.course))]
             .filter(Boolean)
             .sort()
@@ -204,6 +214,9 @@ export default function AdminPage() {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null)
   const [isApproving, setIsApproving] = useState(false)
   const [isDisapproving, setIsDisapproving] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [reportToDelete, setReportToDelete] = useState<Report | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     fetchReports()
@@ -231,6 +244,34 @@ export default function AdminPage() {
   const openDisapproveDialog = (report: Report) => {
     setSelectedReport(report)
     setDisapproveDialogOpen(true)
+  }
+
+  const openDeleteDialog = (report: Report) => {
+    setReportToDelete(report)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!reportToDelete) return
+    setIsDeleting(true)
+    try {
+      const response = await fetch(`/api/reports/${reportToDelete.id}`, {
+        method: "DELETE",
+      })
+      if (response.ok) {
+        toast.success("Report deleted successfully")
+        setDeleteDialogOpen(false)
+        setReportToDelete(null)
+        fetchReports()
+      } else {
+        const err = await response.json().catch(() => ({}))
+        toast.error(err.error || "Failed to delete report")
+      }
+    } catch {
+      toast.error("Failed to delete report")
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   const handleApproveConfirm = async () => {
@@ -324,6 +365,7 @@ export default function AdminPage() {
                     reports={submittedReports}
                     onApprove={openApproveDialog}
                     onDisapprove={openDisapproveDialog}
+                    onDelete={openDeleteDialog}
                     isLoading={isLoading}
                   />
                 </TabsContent>
@@ -332,6 +374,7 @@ export default function AdminPage() {
                     reports={approvedReports}
                     onApprove={openApproveDialog}
                     onDisapprove={openDisapproveDialog}
+                    onDelete={openDeleteDialog}
                     isLoading={isLoading}
                   />
                 </TabsContent>
@@ -340,6 +383,7 @@ export default function AdminPage() {
                     reports={disapprovedReports}
                     onApprove={openApproveDialog}
                     onDisapprove={openDisapproveDialog}
+                    onDelete={openDeleteDialog}
                     isLoading={isLoading}
                   />
                 </TabsContent>
@@ -348,6 +392,7 @@ export default function AdminPage() {
                     reports={reports}
                     onApprove={openApproveDialog}
                     onDisapprove={openDisapproveDialog}
+                    onDelete={openDeleteDialog}
                     isLoading={isLoading}
                   />
                 </TabsContent>
@@ -402,6 +447,22 @@ export default function AdminPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          setDeleteDialogOpen(open)
+          if (!open) setReportToDelete(null)
+        }}
+        title="Delete report?"
+        description={
+          reportToDelete
+            ? `Are you sure you want to delete "${reportToDelete.programName}"? This action cannot be undone.`
+            : "Are you sure you want to delete this report? This action cannot be undone."
+        }
+        onConfirm={handleDeleteConfirm}
+        isLoading={isDeleting}
+      />
     </SidebarProvider>
   )
 }

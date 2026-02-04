@@ -35,9 +35,10 @@ export const authConfig = {
     },
     jwt({ token, user }) {
       if (user) {
-        const u = user as { id?: string; role?: string }
+        const u = user as { id?: string; role?: string; position?: string }
         if (u.id) token.id = u.id
         if (u.role) token.role = u.role
+        if (u.position) token.position = u.position
       }
       return token
     },
@@ -45,6 +46,7 @@ export const authConfig = {
       if (token && session.user) {
         session.user.id = token.id as string
         session.user.role = token.role as string
+        session.user.position = token.position as string | undefined
       }
       return session
     },

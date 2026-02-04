@@ -309,13 +309,15 @@ export async function DELETE(
       return NextResponse.json({ error: "Report not found" }, { status: 404 })
     }
 
-    // Only creator can delete their own reports
-    if (existingReport.createdById !== session.user.id) {
+    const isAdmin = session.user.role === "ADMIN"
+
+    // Admins can delete any report; program heads can only delete their own
+    if (!isAdmin && existingReport.createdById !== session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
     }
 
-    // Cannot delete approved reports
-    if (existingReport.status === "APPROVED") {
+    // Program heads cannot delete approved reports; admins can
+    if (!isAdmin && existingReport.status === "APPROVED") {
       return NextResponse.json(
         { error: "Approved reports cannot be deleted" },
         { status: 400 }

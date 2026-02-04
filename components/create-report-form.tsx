@@ -387,7 +387,7 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
           return
         }
         if (!courseToSubmit?.trim()) {
-          toast.error("Course is required. Please wait for it to load or refresh the page.")
+          toast.error("Program is required. Please wait for it to load or refresh the page.")
           setIsSubmitting(false)
           return
         }
@@ -447,7 +447,7 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
       }
 
       if (!courseToSubmit) {
-        toast.error("Your course is not loaded yet. Please wait a moment and try again.")
+        toast.error("Your program is not loaded yet. Please wait a moment and try again.")
         setIsSubmitting(false)
         return
       }
@@ -647,7 +647,7 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
                 />
               </div>
               <div className="flex flex-col gap-2 w-full">
-                <Label htmlFor="course">Course</Label>
+                <Label htmlFor="course">Program</Label>
                 <Input
                   id="course"
                   value={course}
@@ -866,7 +866,7 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
                                   />
                                   <Label
                                     htmlFor={`status-comment-${objIndex}-${kpiIndex}-${entryIndex}`}
-                                    className="text-sm font-normal cursor-pointer"
+                                    className="text-xs font-normal cursor-pointer"
                                   >
                                     Add comment to status
                                   </Label>
@@ -879,7 +879,7 @@ export function CreateReportForm({ reportId, onSuccess, onCancel }: CreateReport
                                       updateTimeEntry(objIndex, kpiIndex, 0, entryIndex, "statusComment", e.target.value)
                                     }
                                     rows={2}
-                                    className="mt-1"
+                                    className="mt-1 text-sm min-h-0"
                                   />
                                 )}
                               </div>
