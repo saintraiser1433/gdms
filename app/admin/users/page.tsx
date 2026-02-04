@@ -406,7 +406,7 @@ export default function UsersPage() {
             </div>
             <Button onClick={() => setAddModalOpen(true)} className="w-full sm:w-auto" size="sm">
               <RiAddLine className="mr-2 h-4 w-4" />
-              Assigned Incharge
+              Assign Incharge
             </Button>
           </div>
           <Card className="py-2">
@@ -418,12 +418,12 @@ export default function UsersPage() {
                   columns={columns}
                   data={users}
                   getRowId={(row) => row.id}
-                  emptyMessage="No assigned incharges yet"
-                  emptyStateDescription="Add assigned incharges to allow them to create and submit reports"
+                  emptyMessage="No assigned incharge yet"
+                  emptyStateDescription="Assign an incharge to allow them to create and submit reports"
                   emptyStateAction={
                     <Button onClick={() => setAddModalOpen(true)}>
                       <RiAddLine className="mr-2 h-4 w-4" />
-                      Assigned Incharge
+                      Assign Incharge
                     </Button>
                   }
                   searchPlaceholder="Search users..."
