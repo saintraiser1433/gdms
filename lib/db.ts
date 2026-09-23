@@ -7,7 +7,7 @@ const globalForPrisma = globalThis as unknown as {
 }
 
 const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL, // pooled 6543, correct for runtime
+  connectionString: process.env.DIRECT_URL, // pooled 6543, correct for runtime
   ssl: { rejectUnauthorized: false },
 })
 
