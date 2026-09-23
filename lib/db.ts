@@ -7,11 +7,8 @@ const globalForPrisma = globalThis as unknown as {
 }
 
 const pool = new pg.Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'gdms',
-  password: 'postgres',
-  port: 5432,
+  connectionString: process.env.DATABASE_URL, // pooled 6543, correct for runtime
+  ssl: { rejectUnauthorized: false },
 })
 
 const adapter = new PrismaPg(pool)
