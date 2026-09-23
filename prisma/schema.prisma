@@ -22,10 +22,10 @@ model User {
   createdAt    DateTime   @default(now()) @map("created_at")
 
   // Relations
-  createdReports    Report[]        @relation("ReportCreator")
-  reviewedReports   Report[]        @relation("ReportReviewer")
-  comments          Comment[]
-  notifications     Notification[]  @relation("NotificationRecipient")
+  createdReports  Report[]       @relation("ReportCreator")
+  reviewedReports Report[]       @relation("ReportReviewer")
+  comments        Comment[]
+  notifications   Notification[] @relation("NotificationRecipient")
 
   @@map("users")
 }
@@ -46,24 +46,24 @@ model Notification {
 }
 
 model Report {
-  id                   String   @id @default(cuid())
-  programName          String   @map("program_name")
-  implementationPeriod String   @map("implementation_period")
-  responsiblePerson    String   @map("responsible_person")
+  id                   String       @id @default(cuid())
+  programName          String       @map("program_name")
+  implementationPeriod String       @map("implementation_period")
+  responsiblePerson    String       @map("responsible_person")
   location             String
   course               String
-  schoolYear           String   @map("school_year")
+  schoolYear           String       @map("school_year")
   status               ReportStatus @default(DRAFT)
-  
-  createdById   String   @map("created_by")
-  createdBy     User     @relation("ReportCreator", fields: [createdById], references: [id])
-  
-  reviewedById  String?  @map("reviewed_by")
-  reviewedBy    User?    @relation("ReportReviewer", fields: [reviewedById], references: [id])
-  
-  createdAt     DateTime @default(now()) @map("created_at")
-  submittedAt   DateTime? @map("submitted_at")
-  reviewedAt    DateTime? @map("reviewed_at")
+
+  createdById String @map("created_by")
+  createdBy   User   @relation("ReportCreator", fields: [createdById], references: [id])
+
+  reviewedById String? @map("reviewed_by")
+  reviewedBy   User?   @relation("ReportReviewer", fields: [reviewedById], references: [id])
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  submittedAt DateTime? @map("submitted_at")
+  reviewedAt  DateTime? @map("reviewed_at")
 
   // Relations
   objectives Objective[]
@@ -135,39 +135,39 @@ model Strategy {
 }
 
 model TimeEntry {
-  id               String   @id @default(cuid())
-  strategyId       String   @map("strategy_id")
-  strategy         Strategy @relation(fields: [strategyId], references: [id], onDelete: Cascade)
-  
+  id         String   @id @default(cuid())
+  strategyId String   @map("strategy_id")
+  strategy   Strategy @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+
   period           Period
-  periodStartMonth String   @map("period_start_month")
-  periodEndMonth   String   @map("period_end_month")
-  
-  activities       String   @default("")
-  status           String   @default("")
-  statusComment    String?  @map("status_comment")
-  budgetAllocated  Float    @default(0) @map("budget_allocated")
-  budgetSource     String   @default("") @map("budget_source")
-  budgetSpent      Float    @default(0) @map("budget_spent")
-  variance         Float    @default(0)
+  periodStartMonth String @map("period_start_month")
+  periodEndMonth   String @map("period_end_month")
+
+  activities      String  @default("")
+  status          String  @default("")
+  statusComment   String? @map("status_comment")
+  budgetAllocated Float   @default(0) @map("budget_allocated")
+  budgetSource    String  @default("") @map("budget_source")
+  budgetSpent     Float   @default(0) @map("budget_spent")
+  variance        Float   @default(0)
 
   @@index([strategyId])
   @@map("time_entries")
 }
 
 model Comment {
-  id               String   @id @default(cuid())
-  reportId         String   @map("report_id")
-  report           Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
-  
-  commentText      String   @map("comment_text")
-  pinnedToType     PinType  @map("pinned_to_type")
-  pinnedToId       String?  @map("pinned_to_id")
-  pinnedToMetadata String?  @map("pinned_to_metadata") // JSON string for cell coordinates
-  
-  createdById      String   @map("created_by")
-  createdBy        User     @relation(fields: [createdById], references: [id])
-  createdAt        DateTime @default(now()) @map("created_at")
+  id       String @id @default(cuid())
+  reportId String @map("report_id")
+  report   Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  commentText      String  @map("comment_text")
+  pinnedToType     PinType @map("pinned_to_type")
+  pinnedToId       String? @map("pinned_to_id")
+  pinnedToMetadata String? @map("pinned_to_metadata") // JSON string for cell coordinates
+
+  createdById String   @map("created_by")
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now()) @map("created_at")
 
   @@index([reportId])
   @@map("comments")
