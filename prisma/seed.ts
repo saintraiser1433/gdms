@@ -3,12 +3,17 @@ import bcrypt from 'bcryptjs';
 import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
 
+// const pool = new pg.Pool({
+//   user: 'postgres',
+//   host: 'localhost',
+//   database: 'gdms',
+//   password: 'postgres',
+//   port: 5432,
+// });
+
 const pool = new pg.Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'gdms',
-  password: 'postgres',
-  port: 5432,
+  connectionString: process.env.DIRECT_URL, // use direct/session connection for seeding
+  ssl: { rejectUnauthorized: false }, // Supabase requires SSL
 });
 
 const adapter = new PrismaPg(pool);
