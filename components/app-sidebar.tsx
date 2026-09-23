@@ -94,7 +94,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <span
                   className="text-base font-semibold bg-[linear-gradient(to_right,var(--foreground)_50%,#800020_50%)] bg-clip-text text-transparent"
                 >
-                  GIT-DBCES System
+                  GIT-DBCES
                 </span>
               </a>
             </SidebarMenuButton>
